@@ -1,0 +1,63 @@
+# Python/build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Experiment outputs
+logs/
+wandb/
+results/exps/
+*.log
+evaluation_summary*.csv*
+
+# Datasets, simulator assets, and model weights
+datasets/
+datasets
+datasets_96/
+datasets_96
+iGibson/
+checkpoints/
+DisCo_model/
+RRP_model/
+NaiviBridger/
+
+# Reference/vendor trees not required by the released training pipeline
+flodiff_origin/
+
+# Keep only the Conditional UNet dependency from the vendored Diffusion Policy tree.
+diffusion_policy/*
+!diffusion_policy/LICENSE
+!diffusion_policy/diffusion_policy/
+diffusion_policy/diffusion_policy/*
+!diffusion_policy/diffusion_policy/model/
+diffusion_policy/diffusion_policy/model/*
+!diffusion_policy/diffusion_policy/model/diffusion/
+diffusion_policy/diffusion_policy/model/diffusion/*
+!diffusion_policy/diffusion_policy/model/diffusion/conditional_unet1d.py
+!diffusion_policy/diffusion_policy/model/diffusion/conv1d_components.py
+!diffusion_policy/diffusion_policy/model/diffusion/positional_embedding.py
+
+# Superseded local entry points and reports
+scripts/generate_rrp_pose_traces.py
+tests/test_external_pose_training.py
+benchmark.py
+test_flona_gtpos_origin.py
+evaluation_summary .csv.bak
+
+# Local-only configurations
+flona.yaml
+flonabak.yaml
+test_vgc.yaml
+test_origin.yaml
+
+# OS noise
+.DS_Store
