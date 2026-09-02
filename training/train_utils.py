@@ -1091,6 +1091,9 @@ def execute_model(
     planner_metric_size_cm: Optional[float] = None,
     log_add: str = None,
     bridge_diffusion: Optional[NaviBridgeDenoiser] = None,
+    pred_horizon: int = 32,
+    num_trajectory_samples: int = 30,
+    execute_horizon: int = 20,
 ):
     """
     Execute the model on the given data.
@@ -1129,14 +1132,21 @@ def execute_model(
     batch_floorplan = transform(floorplan).to(device)  # (1,3,h,w)
 
     
+    if pred_horizon < 1:
+        raise ValueError("pred_horizon must be at least 1")
+    if num_trajectory_samples < 1:
+        raise ValueError("num_trajectory_samples must be at least 1")
+    if not 1 <= execute_horizon <= pred_horizon:
+        raise ValueError("execute_horizon must be between 1 and pred_horizon")
+
     model_output_dict = model_output(
         model,
         noise_scheduler,
         batch_cur_obss,
         batch_floorplan,
-        32,
+        pred_horizon,
         2,
-        30,
+        num_trajectory_samples,
         goal_pos,
         cur_pos,
         cur_heading,
@@ -1228,11 +1238,11 @@ def execute_model(
                 )
             if not in_bounds(map_xy):
                 continue
-            if i < 20:
-                color = np.array([0, 128, 0, 255]) # Dark green for executed part (0-19)
+            if i < execute_horizon:
+                color = np.array([0, 128, 0, 255]) # Dark green for the executed prefix
                 floorplan_ary[map_xy[0]-2 : map_xy[0]+2, map_xy[1]-2 : map_xy[1]+2, :] = color
             else:
-                color = np.array([0, 200, 0, 255]) # Slightly lighter green for future part (20+)
+                color = np.array([0, 200, 0, 255]) # Slightly lighter green for the remaining predicted suffix
                 floorplan_ary[map_xy[0]-2 : map_xy[0]+2, map_xy[1]-2 : map_xy[1]+2, :] = color
 
         start_xy = np.clip(
@@ -1513,7 +1523,8 @@ def visualize_diffusion_action_distribution(
         fig.set_size_inches(18.5, 10.5)
         save_path = os.path.join(visualize_path, f"sample_{i}.png")
         plt.savefig(save_path)
-        wandb_list.append(wandb.Image(save_path))
+        if use_wandb:
+            wandb_list.append(wandb.Image(save_path))
         plt.close(fig)
     if len(wandb_list) > 0 and use_wandb:
         wandb.log({f"{type}_action_samples": wandb_list}, commit=False)

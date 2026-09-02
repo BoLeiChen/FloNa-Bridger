@@ -134,6 +134,7 @@ scripts/run_navibridger_train_eval.sh <run_name>
 
 Use the same `legacy` or `movement_only` collision accounting mode when
 comparing experiments.
+Recovery defaults to repeated clockwise/right 45-degree turns. Set `recovery_turn_mode: random` to choose left or right once per collision.
 
 ## Tests
 

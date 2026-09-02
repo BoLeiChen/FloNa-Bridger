@@ -83,10 +83,15 @@ def camera_execute_actions(
     save_state,
     obs_img_size,
     collision_accounting_mode="legacy",
+    recovery_turn_mode="continuous_right",
 ):
     if collision_accounting_mode not in {"legacy", "movement_only"}:
         raise ValueError(
             "collision_accounting_mode must be 'legacy' or 'movement_only'"
+        )
+    if recovery_turn_mode not in {"random", "continuous_right"}:
+        raise ValueError(
+            "recovery_turn_mode must be 'random' or 'continuous_right'"
         )
     turn = False
     for subgoal in trajectory:
@@ -113,7 +118,7 @@ def camera_execute_actions(
         if collision:
             current_yaw = np.arctan2(current_heading_point[1] - current_position[1], current_heading_point[0] - current_position[0])
             collision_num = 0
-            coin = np.random.rand() 
+            coin = 1.0 if recovery_turn_mode == "continuous_right" else np.random.rand()
             if coin >= 0.5:
                 while collision and collision_num < 8:
                     turn = True
@@ -464,6 +469,16 @@ def evaluate_scene(
     metric_waipoint_spacing = 0.045
     waypoint_spacing = 1
     len_traj_pred = int(config.get("len_traj_pred", 32))
+    num_trajectory_samples = int(config.get("num_trajectory_samples", 30))
+    execute_horizon = int(config.get("execute_horizon", 20))
+    if len_traj_pred < 1:
+        raise ValueError("len_traj_pred must be at least 1")
+    if num_trajectory_samples < 1:
+        raise ValueError("num_trajectory_samples must be at least 1")
+    if not 1 <= execute_horizon <= len_traj_pred:
+        raise ValueError(
+            "execute_horizon must be between 1 and len_traj_pred"
+        )
     max_steps = -1 if not short_exec else 90
     context_size = config["context_size"]
     obs_img_size = tuple(config.get("obs_image_size", DEFAULT_OBS_IMG_SIZE))
@@ -477,6 +492,13 @@ def evaluate_scene(
     if collision_accounting_mode not in {"legacy", "movement_only"}:
         raise ValueError(
             "collision_accounting_mode must be 'legacy' or 'movement_only'"
+        )
+    recovery_turn_mode = config.get(
+        "recovery_turn_mode", "continuous_right"
+    )
+    if recovery_turn_mode not in {"random", "continuous_right"}:
+        raise ValueError(
+            "recovery_turn_mode must be 'random' or 'continuous_right'"
         )
 
     for traj_id in tqdm(selected_trajs, desc=progress_desc, leave=False):
@@ -522,6 +544,7 @@ def evaluate_scene(
                     save_state,
                     obs_img_size,
                     collision_accounting_mode=collision_accounting_mode,
+                    recovery_turn_mode=recovery_turn_mode,
                 )
                 trajectory_to_execute = []
 
@@ -595,9 +618,12 @@ def evaluate_scene(
                     planner_metric_size_cm,
                     os.path.join(traj_img_save_dir, f'{save_num}.png'),
                     bridge_diffusion=bridge_diffusion,
+                    pred_horizon=len_traj_pred,
+                    num_trajectory_samples=num_trajectory_samples,
+                    execute_horizon=execute_horizon,
                 )
                 save_num += 1
-                for k in range(20):
+                for k in range(execute_horizon):
                     trajectory_to_execute.append(np.array([actions_2d[k][0], actions_2d[k][1], height]))
             else:
                 frame = simulator.renderer.render(modes=("rgb"))

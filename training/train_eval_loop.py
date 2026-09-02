@@ -148,9 +148,10 @@ def train_eval_loop_flona(
                 bridge_diffusion=bridge_diffusion,
             )
         
-        wandb.log({
-            "lr": optimizer.param_groups[0]["lr"],
-        })
+        if use_wandb:
+            wandb.log({
+                "lr": optimizer.param_groups[0]["lr"],
+            })
        
     print()
 

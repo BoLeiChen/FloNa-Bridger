@@ -13,6 +13,9 @@ context_size: 4
 metric_waypoint_spacing: 0.045
 waypoint_spacing: 1
 len_traj_pred: 32
+# Sample 32 candidate trajectories of 32 steps and execute only the first 16.
+num_trajectory_samples: 32
+execute_horizon: 16
 arrive_th: 0.25
 encoding_size: 256
 shallow_feature_layers: [2, 5]
@@ -40,6 +43,8 @@ astar_heading_realign_threshold_deg: 150.0
 # Legacy mode counts recovery turns as collisions, matching earlier reports.
 # Set movement_only to use the newer accounting behavior.
 collision_accounting_mode: legacy
+# Collision recovery direction: continuous_right (default) or random.
+recovery_turn_mode: continuous_right
 diffusion_mode: navibridger
 use_astar_local_cond: true
 # Applied only while training; inference always uses the full condition.
