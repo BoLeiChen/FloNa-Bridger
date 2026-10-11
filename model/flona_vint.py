@@ -144,8 +144,17 @@ class CurvatureResidualFusion(nn.Module):
             [deep_current, self.shallow_summary(attended), turn_risk[:, None]], dim=-1
         )
         alpha = self.alpha_max * torch.sigmoid(self.gate(gate_input).squeeze(-1))
+        effective_residual = alpha[:, None] * correction
         fused = deep_features.clone()
-        fused[:, -1] = fused[:, -1] + alpha[:, None] * correction
+        fused[:, -1] = fused[:, -1] + effective_residual
+        # Keep detached diagnostics for controlled parameter studies and
+        # qualitative figures. The ratio is more interpretable than alpha
+        # alone because the learned correction and deep token need not have
+        # the same norm.
+        self.last_effective_residual_ratio = (
+            effective_residual.norm(dim=-1)
+            / deep_current.norm(dim=-1).clamp_min(1e-8)
+        ).detach()
         return fused, alpha, attention_weights[:, 0]
 
 

@@ -3,7 +3,10 @@ import torch
 
 from model.data_utils import path_xy_to_local_condition, sample_path_prefix_points
 from model.flona_vint import CurvatureResidualFusion, compute_path_turn_risk
-from training.train_utils import apply_paper_train_perturbations
+from training.train_utils import (
+    _prepare_astar_local_condition_for_model,
+    apply_paper_train_perturbations,
+)
 
 
 def test_sample_path_prefix_valid_mask_marks_terminal_padding():
@@ -61,6 +64,30 @@ def test_training_perturbation_preserves_five_dimensional_semantics():
     assert noise_bound == 0.0
 
 
+def test_dataset_astar_condition_is_normalized_for_every_diffusion_mode():
+    metric_condition = torch.tensor(
+        [[[0.045, -0.09, 0.5, 0.25, 1.0],
+          [0.135, 0.18, -0.5, 0.75, 0.0]]]
+    )
+    config = {
+        "metric_waypoint_spacing": 0.045,
+        "waypoint_spacing": 1,
+    }
+
+    actual = _prepare_astar_local_condition_for_model(metric_condition, config)
+
+    torch.testing.assert_close(
+        actual[..., :2],
+        torch.tensor([[[1.0, -2.0], [3.0, 4.0]]]),
+    )
+    torch.testing.assert_close(actual[..., 2:], metric_condition[..., 2:])
+    # Normalization must not mutate the cached metric-space input.
+    torch.testing.assert_close(
+        metric_condition[..., :2],
+        torch.tensor([[[0.045, -0.09], [0.135, 0.18]]]),
+    )
+
+
 def test_turn_risk_ignores_invalid_padding_and_increases_with_curvature():
     straight = torch.tensor(
         [[[1.0, 0.0, 0.0, 1.0, 1.0],
@@ -93,6 +120,7 @@ def test_curvature_fusion_starts_at_exact_deep_baseline_without_hard_prior():
     torch.testing.assert_close(shallow_weight[0], shallow_weight[1])
     assert torch.all((shallow_weight >= 0.0) & (shallow_weight <= 0.25))
     assert attention.shape == (2, 7)
+    torch.testing.assert_close(gate.last_effective_residual_ratio, torch.zeros(2))
 
 
 def test_structured_path_noise_is_continuous_and_keeps_padded_tail_together():

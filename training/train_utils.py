@@ -397,6 +397,18 @@ def _normalize_astar_local_condition(
     return normalized
 
 
+def _prepare_astar_local_condition_for_model(
+    astar_local_cond: torch.Tensor,
+    perturb_config: dict,
+) -> torch.Tensor:
+    """Convert dataset A* coordinates from meters to model waypoint units."""
+    metric_scale = (
+        float(perturb_config["metric_waypoint_spacing"])
+        * float(perturb_config["waypoint_spacing"])
+    )
+    return _normalize_astar_local_condition(astar_local_cond, metric_scale)
+
+
 def _path_xy_to_local_condition_torch(
     path_local_xy: torch.Tensor,
     valid_mask: torch.Tensor,
@@ -604,15 +616,12 @@ def train_flona(
                 batch_viz_floorplan_images[b, :, curr_y, curr_x] = torch.tensor(GREEN)
                 batch_viz_floorplan_images[b, :, ori_y, ori_x] = torch.tensor(CYAN)
 
-            model_astar_local_cond = astar_local_cond
-            if bridge_diffusion is not None:
-                metric_scale = (
-                    float(perturb_config["metric_waypoint_spacing"])
-                    * float(perturb_config["waypoint_spacing"])
-                )
-                model_astar_local_cond = _normalize_astar_local_condition(
-                    astar_local_cond, metric_scale
-                )
+            # Dataset A* coordinates are metric for every diffusion mode. Keep
+            # DDPM and NaviBridge on the same waypoint scale before applying
+            # metric-space pose/path perturbations and before conditioning.
+            model_astar_local_cond = _prepare_astar_local_condition_for_model(
+                astar_local_cond, perturb_config
+            )
 
             noisy_curr_pos, noisy_curr_ori, noisy_astar_local_cond, path_noise_bound_m = apply_paper_train_perturbations(
                 curr_pos,
@@ -926,15 +935,10 @@ def evaluate_flona(
                     batch_viz_floorplan_images[b, :, ori_y, ori_x] = torch.tensor(CYAN)
 
                 B = actions.shape[0]
-                model_astar_local_cond = astar_local_cond.to(device)
-                if bridge_diffusion is not None:
-                    metric_scale = (
-                        float(perturb_config["metric_waypoint_spacing"])
-                        * float(perturb_config["waypoint_spacing"])
-                    )
-                    model_astar_local_cond = _normalize_astar_local_condition(
-                        model_astar_local_cond, metric_scale
-                    )
+                # Match training and closed-loop inference for DDPM as well.
+                model_astar_local_cond = _prepare_astar_local_condition_for_model(
+                    astar_local_cond.to(device), perturb_config
+                )
                 obsfloorplan_cond = model("vision_encoder",
                                           obs_img=batch_obs_images,
                                           floorplan_img=batch_floorplan_images,
@@ -943,6 +947,15 @@ def evaluate_flona(
                                           obs_ori = curr_ori,
                                           astar_global_cond=model_astar_local_cond,
                                           )
+                if image_log_freq != 0 and i % image_log_freq == 0:
+                    visualize_shallow_feature_fusion(
+                        model.vision_encoder,
+                        batch_viz_obs_images,
+                        project_folder,
+                        epoch,
+                        num_images_log,
+                        split="evaluate",
+                    )
                 obsfloorplan_cond = obsfloorplan_cond.flatten(start_dim=1)
                 distance = distance.to(device)
                 deltas = get_delta(actions)
@@ -1377,6 +1390,75 @@ def to_numpy(tensor: torch.Tensor) -> np.ndarray:
 
 def from_numpy(array: np.ndarray) -> torch.Tensor:
     return torch.from_numpy(array).float()
+
+
+def visualize_shallow_feature_fusion(
+    vision_encoder: nn.Module,
+    batch_viz_obs_images: torch.Tensor,
+    project_folder: str,
+    epoch: int,
+    num_images_log: int,
+    split: str = "evaluate",
+) -> None:
+    """Save fixed-sample shallow-attention evidence for fusion ablations."""
+    required = (
+        "last_shallow_weight",
+        "last_turn_risk",
+        "last_shallow_spatial_attention",
+        "last_effective_residual_ratio",
+    )
+    if not all(hasattr(vision_encoder, name) for name in required):
+        return
+
+    alphas = vision_encoder.last_shallow_weight.detach().float().cpu()
+    risks = vision_encoder.last_turn_risk.detach().float().cpu()
+    attentions = vision_encoder.last_shallow_spatial_attention.detach().float().cpu()
+    ratios = vision_encoder.last_effective_residual_ratio.detach().float().cpu()
+    if attentions.ndim != 2:
+        return
+    grid_size = int(round(math.sqrt(attentions.shape[1])))
+    if grid_size * grid_size != attentions.shape[1]:
+        return
+
+    output_dir = os.path.join(
+        project_folder, "visualize", split, f"epoch{epoch}", "shallow_feature_fusion"
+    )
+    os.makedirs(output_dir, exist_ok=True)
+    count = min(int(num_images_log), batch_viz_obs_images.shape[0], attentions.shape[0])
+    for sample_idx in range(count):
+        image = batch_viz_obs_images[sample_idx].detach().float().cpu()
+        image = np.moveaxis(image.numpy(), 0, -1)
+        image = np.clip(image, 0.0, 1.0)
+        heatmap = attentions[sample_idx].reshape(1, 1, grid_size, grid_size)
+        heatmap = F.interpolate(
+            heatmap,
+            size=image.shape[:2],
+            mode="bilinear",
+            align_corners=False,
+        )[0, 0].numpy()
+        heat_min, heat_max = float(heatmap.min()), float(heatmap.max())
+        heatmap = (heatmap - heat_min) / max(heat_max - heat_min, 1e-8)
+
+        fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.5), constrained_layout=True)
+        axes[0].imshow(image)
+        axes[0].set_title("Current RGB")
+        axes[1].imshow(heatmap, cmap="magma", vmin=0.0, vmax=1.0)
+        axes[1].set_title("Shallow spatial attention")
+        axes[2].imshow(image)
+        axes[2].imshow(heatmap, cmap="magma", alpha=0.48, vmin=0.0, vmax=1.0)
+        axes[2].set_title(
+            f"Overlay\nalpha={alphas[sample_idx]:.4f}, "
+            f"turn risk={risks[sample_idx]:.3f}, "
+            f"residual/deep={ratios[sample_idx]:.4f}"
+        )
+        for axis in axes:
+            axis.axis("off")
+        fig.savefig(
+            os.path.join(output_dir, f"sample_{sample_idx}.png"),
+            dpi=220,
+            bbox_inches="tight",
+        )
+        plt.close(fig)
 
 def visualize_diffusion_action_distribution(
     ema_model: nn.Module,
