@@ -75,6 +75,8 @@ class DepthMap:
         self.clearance = torch.as_tensor(free,dtype=torch.float32,device=device)[None]
         self.occupied_cells = int(occupied.sum())
         self.known_fraction = float(known.mean())
+        self.occupied = torch.as_tensor(occupied, device=device)[None]
+        self.known = torch.as_tensor(known | occupied, device=device)[None]
 
     def query(self, field, points):
         h,w = field.shape[-2:]
@@ -95,6 +97,14 @@ def depth_to_map(depth, intrinsic, config, device):
     depth=np.asarray(depth,dtype=np.float32); k=np.asarray(intrinsic,dtype=np.float64)
     if depth.ndim!=2 or k.shape!=(3,3) or not np.isfinite(k).all() or min(k[0,0],k[1,1])<=0:
         raise ValueError('invalid depth shape or camera intrinsics')
+    calibration=dict(accepted=True,scale=1.,reason='disabled')
+    raw_valid_fraction=float((np.isfinite(depth)&(depth>.1)&(depth<19.5)).mean())
+    if config.get('floor_scale_calibration', False):
+        from .depth_bridge_route import calibrate_floor_scale
+        depth,calibration=calibrate_floor_scale(depth,k,float(config.get('camera_height',.85)))
+        if not calibration['accepted']:
+            # Unreliable geometry must not contaminate memory or steer policy.
+            depth=np.zeros_like(depth)
     res=float(config.get('resolution',.025)); xmin,xmax=-1.,4.; ymin,ymax=-2.5,2.5
     if not math.isfinite(res) or res<=0:raise ValueError('invalid map resolution')
     h,w=depth.shape;v,u=np.mgrid[:h,:w]
@@ -116,9 +126,15 @@ def depth_to_map(depth, intrinsic, config, device):
     inside=(row>=0)&(row<shape[0])&(col>=0)&(col<shape[1])
     for mask, dest in [(obstacle,occ),(floor,known)]:
         use=mask&inside;dest[row[use],col[use]]=True
+    if config.get('floor_surface', False):
+        from .depth_bridge_route import rasterize_floor_surface
+        known |= rasterize_floor_surface(forward, left, floor & inside, shape,
+            res, xmin, ymax, float(config.get('floor_surface_max_edge_m', .1)))
     known |= occ
     local=DepthMap(occ,known,res,xmin,ymax,device)
     local.valid_fraction=float(valid.mean())
+    local.raw_valid_fraction=raw_valid_fraction
+    local.depth_calibration=calibration
     return local
 
 
@@ -182,6 +198,9 @@ class BridgeDepthGuidance:
     def total(self,terms):
         return sum(float(self.weights[k])*v for k,v in terms.items())
 
+    def bind_reference(self, reference):
+        """Optional local-goal selection at each clean prediction."""
+
     @torch.no_grad()
     def __call__(self, denoised, sigma, stage):
         if self.scale==0 or float(sigma.max())>self.sigma_start or self.map.valid_fraction<.05:
@@ -189,6 +208,7 @@ class BridgeDepthGuidance:
         # Evaluation is a single observation with N candidate paths.
         mean_encoded=denoised.mean(0,keepdim=True).detach()
         reference=decode_metric(mean_encoded,self.metric_scale)
+        self.bind_reference(reference)
         ref_geometry=self.geometry(reference)
         with torch.enable_grad():
             mean=mean_encoded.clone().requires_grad_(True)

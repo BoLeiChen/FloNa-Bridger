@@ -62,7 +62,7 @@ def check_collision(pos, travers_map):
 def l2_distance(v1, v2):
     return np.linalg.norm(np.array(v1) - np.array(v2))
 
-def camera_set_and_record(env, current_position, current_heading, obs_img_size):
+def camera_set_and_record(env, current_position, current_heading, obs_img_size, observation_callback=None):
     if env.viewer is not None:
         env.viewer.initial_pos = current_position
         env.viewer.initial_view_direction = current_heading - current_position
@@ -71,6 +71,8 @@ def camera_set_and_record(env, current_position, current_heading, obs_img_size):
     
     frame = env.renderer.render(modes=("rgb"))
     img = Image.fromarray((255 * np.concatenate(frame, axis=1)[:, :, :3]).astype(np.uint8))
+    if observation_callback is not None:
+        observation_callback(np.asarray(img), current_position, current_heading)
     resized_img = resize_and_aspect_crop(img, obs_img_size, IMAGE_ASPECT_RATIO)
     env.step()
     return resized_img
@@ -86,6 +88,7 @@ def camera_execute_actions(
     obs_img_size,
     collision_accounting_mode="legacy",
     recovery_turn_mode="continuous_right",
+    observation_callback=None,
 ):
     if collision_accounting_mode not in {"legacy", "movement_only"}:
         raise ValueError(
@@ -103,7 +106,7 @@ def camera_execute_actions(
             collision = check_collision(sub_waypoint[:2], travers_map)          
             current_position = last_sub_waypoint
             current_heading_point = sub_waypoint
-            resized_img = camera_set_and_record(env, current_position, current_heading_point, obs_img_size)
+            resized_img = camera_set_and_record(env, current_position, current_heading_point, obs_img_size, observation_callback)
             save_state.append(np.array([current_position[0], current_position[1], current_heading_point[0], current_heading_point[1], collision]))
           
             last_sub_waypoint = sub_waypoint
@@ -127,7 +130,7 @@ def camera_execute_actions(
                     collision_num += 1
                     current_yaw -= 45 / 180 * np.pi
                     current_heading_point[:2] = current_position[:2] + np.array([np.cos(current_yaw), np.sin(current_yaw)]) * 0.02
-                    resized_img = camera_set_and_record(env, current_position, current_heading_point, obs_img_size)
+                    resized_img = camera_set_and_record(env, current_position, current_heading_point, obs_img_size, observation_callback)
                     recovery_collision = collision if collision_accounting_mode == "legacy" else False
                     collision = check_collision(current_heading_point[:2], travers_map)
                     save_state.append(np.array([
@@ -146,7 +149,7 @@ def camera_execute_actions(
                     collision_num += 1
                     current_yaw += 45 / 180 * np.pi
                     current_heading_point[:2] = current_position[:2] + np.array([np.cos(current_yaw), np.sin(current_yaw)]) * 0.02
-                    resized_img = camera_set_and_record(env, current_position, current_heading_point, obs_img_size)
+                    resized_img = camera_set_and_record(env, current_position, current_heading_point, obs_img_size, observation_callback)
                     recovery_collision = collision if collision_accounting_mode == "legacy" else False
                     collision = check_collision(current_heading_point[:2], travers_map)
                     save_state.append(np.array([
@@ -518,6 +521,18 @@ def evaluate_scene(
         start_time, goal_time = 4, -1
 
         cur_obs_list = []
+        map_memory = None
+        depth_observations = None
+        if depth_estimator is not None:
+            from model.depth_bridge_route import DepthMapMemory
+            memory_frames = int(config['depth_bridge_guidance'].get('memory_frames', 0))
+            if memory_frames < 0:
+                raise ValueError('memory_frames must be nonnegative')
+            if memory_frames:
+                map_memory = DepthMapMemory(memory_frames)
+                from model.depth_bridge_route import DepthObservationBuffer
+                depth_observations = DepthObservationBuffer(memory_frames,
+                    float(config['depth_bridge_guidance'].get('memory_observation_spacing_m', .1)))
         trajectory_to_execute = [np.array([all_traj[idx][0], all_traj[idx][1], height]) for idx in range(start_time - context_size, start_time + 1)]
         heading_to_execute = [np.array([all_traj[idx][2], all_traj[idx][3], height]) for idx in range(start_time - context_size, start_time + 1)]
         goal_pos = np.array([[all_traj[goal_time][0], all_traj[goal_time][1]]])
@@ -555,6 +570,7 @@ def evaluate_scene(
                     obs_img_size,
                     collision_accounting_mode=collision_accounting_mode,
                     recovery_turn_mode=recovery_turn_mode,
+                    observation_callback=depth_observations.observe if depth_observations is not None else None,
                 )
                 trajectory_to_execute = []
 
@@ -614,17 +630,35 @@ def evaluate_scene(
                 energy_guidance = None
                 if depth_estimator is not None:
                     from model.depth_bridge_guidance import depth_to_map, BridgeDepthGuidance
+                    guidance_config = config['depth_bridge_guidance']
+                    # Same evidence source as server memory: actual past RGB
+                    # observations at measured poses, not hypothetical views.
+                    if depth_observations is not None:
+                        for historical_rgb, pose in depth_observations.drain():
+                            historical_depth = depth_estimator.predict(historical_rgb)
+                            map_memory.add(depth_to_map(historical_depth, simulator.renderer.get_intrinsics(),
+                                guidance_config, device), pose)
                     # Additional RGB rendering only, at the actual level-camera
                     # pose. No simulator stepping and no ground-truth depth.
                     simulator.renderer.set_camera(current_position, current_heading_point, [0,0,1])
                     rgb_frame = simulator.renderer.render(modes=("rgb"))
                     rgb = (np.clip(np.concatenate(rgb_frame, axis=1)[:,:,:3],0,1)*255).astype(np.uint8)
                     depth = depth_estimator.predict(rgb)
-                    guidance_config = config['depth_bridge_guidance']
                     local_map = depth_to_map(depth, simulator.renderer.get_intrinsics(), guidance_config, device)
+                    single_view_known_fraction = local_map.known_fraction
+                    if map_memory is not None:
+                        heading = cur_heading[0] - cur_pos[0]
+                        map_memory.add(local_map, [*cur_pos[0], np.arctan2(heading[1], heading[0])])
+                        local_map = map_memory.current()
                     goal_local = to_local_coords(goal_pos, cur_pos[0], cur_heading[0])
-                    energy_guidance = BridgeDepthGuidance(local_map, goal_local, guidance_config,
-                        metric_waipoint_spacing * waypoint_spacing)
+                    if guidance_config.get('route_energy', False):
+                        from model.depth_bridge_route import BridgeRouteGuidance
+                        energy_guidance = BridgeRouteGuidance(local_map, goal_local, guidance_config,
+                            astar_local_cond[:, :2], astar_local_cond[:, 4], execute_horizon,
+                            metric_waipoint_spacing * waypoint_spacing)
+                    else:
+                        energy_guidance = BridgeDepthGuidance(local_map, goal_local, guidance_config,
+                            metric_waipoint_spacing * waypoint_spacing)
                 actions_2d = execute_model(
                     model,
                     cur_pos,
@@ -652,6 +686,11 @@ def evaluate_scene(
                         diagnostic.write(json.dumps(dict(cycle=save_num,
                             depth_valid_fraction=local_map.valid_fraction,
                             known_fraction=local_map.known_fraction, occupied_cells=local_map.occupied_cells,
+                            single_view_known_fraction=single_view_known_fraction,
+                            depth_calibration=local_map.depth_calibration,
+                            raw_depth_valid_fraction=local_map.raw_valid_fraction,
+                            memory_frames=len(map_memory.frames) if map_memory is not None else 0,
+                            route_active=any(u.get('route_active', False) for u in energy_guidance.records),
                             visible_goal=energy_guidance.visible, updates=energy_guidance.records))+'\n')
                     if save_num == 0:
                         Image.fromarray(rgb).save(os.path.join(traj_img_save_dir, 'depth_input_rgb.png'))
