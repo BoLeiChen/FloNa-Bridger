@@ -61,3 +61,7 @@ test_origin.yaml
 
 # OS noise
 .DS_Store
+
+# Downloaded official depth source (pinned in experiments provenance)
+external/
+/iGibson

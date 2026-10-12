@@ -171,6 +171,7 @@ class NaviBridgeDenoiser:
         global_cond: torch.Tensor,
         *,
         local_cond: torch.Tensor,
+        energy_guidance=None,
     ) -> torch.Tensor:
         """Generate a trajectory with NaviBridger's churned Heun solver."""
         local_cond = self._prepare_local_cond(local_cond, training=False)
@@ -193,6 +194,8 @@ class NaviBridgeDenoiser:
                 )
                 if self.config.clip_denoised:
                     denoised = denoised.clamp(-1, 1)
+                if energy_guidance is not None:
+                    denoised = energy_guidance(denoised, current_sigma_batch, "churn")
                 stochastic_derivative = self._bridge_derivative(
                     x, denoised, xT, current_sigma_batch, stochastic=True
                 )
@@ -216,6 +219,8 @@ class NaviBridgeDenoiser:
             )
             if self.config.clip_denoised:
                 denoised = denoised.clamp(-1, 1)
+            if energy_guidance is not None:
+                denoised = energy_guidance(denoised, sigma_hat_batch, "predictor")
             derivative = self._bridge_derivative(x, denoised, xT, sigma_hat_batch)
             delta_sigma = next_sigma - sigma_hat
             euler_x = x + derivative * delta_sigma
@@ -233,6 +238,8 @@ class NaviBridgeDenoiser:
             )
             if self.config.clip_denoised:
                 next_denoised = next_denoised.clamp(-1, 1)
+            if energy_guidance is not None:
+                next_denoised = energy_guidance(next_denoised, next_sigma_batch, "corrector")
             next_derivative = self._bridge_derivative(
                 euler_x, next_denoised, xT, next_sigma_batch
             )

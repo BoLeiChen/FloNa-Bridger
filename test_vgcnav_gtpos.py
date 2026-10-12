@@ -1,4 +1,6 @@
 import os
+import json
+import hashlib
 import sys
 import time
 import subprocess
@@ -434,6 +436,7 @@ def evaluate_scene(
     planner_free_thresh,
     floor_shapes,
     progress_desc,
+    depth_estimator=None,
 ):
     scene_id = scene_name_floor.split('_')[0]
     floor = int(scene_name_floor.split('_')[1])
@@ -503,6 +506,13 @@ def evaluate_scene(
 
     for traj_id in tqdm(selected_trajs, desc=progress_desc, leave=False):
         traj_name = f'traj_{traj_id}'
+        if config.get('paired_episode_seed') is not None:
+            key = f"{config['paired_episode_seed']}:{scene_name_floor}:{traj_id}"
+            episode_seed = int.from_bytes(hashlib.sha256(key.encode()).digest()[:4], 'little')
+            np.random.seed(episode_seed)
+            torch.manual_seed(episode_seed)
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed_all(episode_seed)
         traj_file = os.path.join(trajs_dir, traj_name, f'{traj_name}.npy')
         all_traj = np.load(traj_file)
         start_time, goal_time = 4, -1
@@ -601,6 +611,20 @@ def evaluate_scene(
                         )
 
                 cur_obs = torch.cat(cur_obs_list, dim=0)
+                energy_guidance = None
+                if depth_estimator is not None:
+                    from model.depth_bridge_guidance import depth_to_map, BridgeDepthGuidance
+                    # Additional RGB rendering only, at the actual level-camera
+                    # pose. No simulator stepping and no ground-truth depth.
+                    simulator.renderer.set_camera(current_position, current_heading_point, [0,0,1])
+                    rgb_frame = simulator.renderer.render(modes=("rgb"))
+                    rgb = (np.clip(np.concatenate(rgb_frame, axis=1)[:,:,:3],0,1)*255).astype(np.uint8)
+                    depth = depth_estimator.predict(rgb)
+                    guidance_config = config['depth_bridge_guidance']
+                    local_map = depth_to_map(depth, simulator.renderer.get_intrinsics(), guidance_config, device)
+                    goal_local = to_local_coords(goal_pos, cur_pos[0], cur_heading[0])
+                    energy_guidance = BridgeDepthGuidance(local_map, goal_local, guidance_config,
+                        metric_waipoint_spacing * waypoint_spacing)
                 actions_2d = execute_model(
                     model,
                     cur_pos,
@@ -621,7 +645,17 @@ def evaluate_scene(
                     pred_horizon=len_traj_pred,
                     num_trajectory_samples=num_trajectory_samples,
                     execute_horizon=execute_horizon,
+                    energy_guidance=energy_guidance,
                 )
+                if energy_guidance is not None:
+                    with open(os.path.join(traj_img_save_dir, 'depth_guidance.jsonl'), 'a') as diagnostic:
+                        diagnostic.write(json.dumps(dict(cycle=save_num,
+                            depth_valid_fraction=local_map.valid_fraction,
+                            known_fraction=local_map.known_fraction, occupied_cells=local_map.occupied_cells,
+                            visible_goal=energy_guidance.visible, updates=energy_guidance.records))+'\n')
+                    if save_num == 0:
+                        Image.fromarray(rgb).save(os.path.join(traj_img_save_dir, 'depth_input_rgb.png'))
+                        np.save(os.path.join(traj_img_save_dir, 'predicted_depth_m.npy'), depth)
                 save_num += 1
                 for k in range(execute_horizon):
                     trajectory_to_execute.append(np.array([actions_2d[k][0], actions_2d[k][1], height]))
@@ -650,6 +684,12 @@ def run_worker(args):
         return
 
     model, noise_scheduler, bridge_diffusion, transform, device = build_model_and_device(config, worker_id)
+    depth_estimator = None
+    if config.get('depth_bridge_guidance', {}).get('enabled', False):
+        if bridge_diffusion is None:
+            raise ValueError('depth_bridge_guidance is only supported by NaviBridge')
+        from model.depth_bridge_guidance import MetricDepthEstimator
+        depth_estimator = MetricDepthEstimator(config['depth_bridge_guidance'], device)
     planner_free_thresh = float(config.get("planner_free_thresh", 0.96))
     floor_shapes = np.load(os.path.join(config["trav_maps_path"], "floor_shapes.npy"), allow_pickle=True).item()
 
@@ -684,6 +724,7 @@ def run_worker(args):
                 planner_free_thresh=planner_free_thresh,
                 floor_shapes=floor_shapes,
                 progress_desc=f"Trajs in {scene_name_floor} [w{worker_id}]",
+                depth_estimator=depth_estimator,
             )
         finally:
             simulator.disconnect()

@@ -1107,6 +1107,7 @@ def execute_model(
     pred_horizon: int = 32,
     num_trajectory_samples: int = 30,
     execute_horizon: int = 20,
+    energy_guidance=None,
 ):
     """
     Execute the model on the given data.
@@ -1166,6 +1167,7 @@ def execute_model(
         astar_local_cond,
         device=device,
         bridge_diffusion=bridge_diffusion,
+        energy_guidance=energy_guidance,
     )
     actions = model_output_dict['actions'].mean(dim=0)  # [1,8,2]
     
@@ -1330,6 +1332,7 @@ def model_output(
     device: torch.device,
     bridge_diffusion: Optional[NaviBridgeDenoiser] = None,
     astar_global_cond: Optional[torch.Tensor] = None,
+    energy_guidance=None,
 ):
 
     astar_local_cond = astar_local_cond.to(device)
@@ -1357,8 +1360,11 @@ def model_output(
             astar_prior,
             obsfloorplan_cond_fused,
             local_cond=astar_local_cond,
+            energy_guidance=energy_guidance,
         )
     else:
+        if energy_guidance is not None:
+            raise ValueError("RGB depth guidance requires NaviBridge, not DDPM")
         diffusion_output = torch.randn(
             (len(obsfloorplan_cond_fused), pred_horizon, action_dim), device=device)
         for k in noise_scheduler.timesteps[:]:
