@@ -93,9 +93,10 @@ def test_route_no_valid_segments_and_disabled_guidance_are_identity():
 def test_memory_does_not_create_free_blind_space():
     source=observed_map()
     empty=DepthMap(np.zeros((121,121),bool),np.zeros((121,121),bool),.025,-1,1.5,'cpu')
-    empty.valid_fraction=1.
+    empty.valid_fraction=0.
     mem=DepthMapMemory(16);mem.add(source,[0,0,0]);mem.add(empty,[.25,0,0])
     fused=mem.current()
+    assert fused.valid_fraction==1.  # Retain trustworthy history despite missing current depth.
     assert fused.query(fused.clearance,torch.zeros(1,1,2))[0].item()==0
     assert fused.query(fused.clearance,torch.tensor([[[1.,0.]]]))[0].item()>.15
 

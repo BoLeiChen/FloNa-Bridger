@@ -108,7 +108,8 @@ class DepthMapMemory:
     """Same occupied-wins pose fusion as server ObservationMapMemory.
 
     Sources are retained without repeated resampling, and reset per episode.
-    Current numerical depth validity still controls whether guidance runs.
+    A failed current depth estimate contributes no evidence; retained supported
+    observations may still guide inside their observed area in static scenes.
     """
     def __init__(self, capacity=16):
         if int(capacity)!=capacity or capacity<1:
@@ -148,7 +149,7 @@ class DepthMapMemory:
             occupied |= ((hits>.001)&(outside==0)).reshape_as(occupied)
         fused=DepthMap(occupied[0].cpu().numpy(),(known|occupied)[0].cpu().numpy(),
                        target.resolution,target.x_min,target.y_max,device)
-        fused.valid_fraction=target.valid_fraction
+        fused.valid_fraction=max(local.valid_fraction for local,_ in self.frames)
         fused.raw_valid_fraction=getattr(target,'raw_valid_fraction',target.valid_fraction)
         fused.depth_calibration=getattr(target,'depth_calibration',{})
         return fused

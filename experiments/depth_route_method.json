@@ -16,7 +16,7 @@
   ],
   "local_adaptations": [
     "RGB-only Depth Anything V2 metric optical-Z instead of server simulator radial depth; actual level camera height 0.85 m and native intrinsics.",
-    "Monocular scale correction uses known camera height divided by fitted horizontal-floor plane height. Require >=55% support in the lower-image ROI, >=35% in each row/column band, <=2.5% relative MAD, and scale in [0.25,2]. No simulator depth, labels or navigation scores. If calibration is unsupported, exclude that observation from geometry and fall back to the bridge for an unsupported current view.",
+    "Monocular scale correction uses known camera height divided by fitted horizontal-floor plane height. Require >=55% support in the lower-image ROI, >=35% in each row/column band, <=2.5% relative MAD, and scale in [0.25,2]. No simulator depth, labels or navigation scores. Unsupported observations add no geometry; supported historical evidence can still guide its observed area in static scenes. With no supported observations, fall back to the bridge.",
     "Observed adjacent floor triangles no longer leave projection-sampling holes; all three vertices must be valid and unoccluded, all metric edges <=0.1 m. This interpolates observed surfaces only.",
     "Keep VGCNav 0.045 m action unit, 0.15 m body radius, 0.01 m per-update limit, 32-candidate mean execution, 16 future points executed. Local goal uses decoded index 16 (origin prepended).",
     "Historical depth uses actual RGB frames from executed motion and recovery plus current replanning view. Nearby observations are subsampled at 0.1 m / 0.1 rad before depth inference. Source maps retained, duplicate poses replaced, history reset each episode. No additional simulator motion or privileged views.",
