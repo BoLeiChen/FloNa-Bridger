@@ -300,6 +300,9 @@ def load_eval_config(config_path: str, ckpt_path: Optional[str], exp_name: Optio
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
+    config["testdataset"] = os.path.join(config["data_root"], "scenes_117", "test")
+    config["trav_maps_path"] = os.path.join(config["data_root"], "trav_maps")
+
     if ckpt_path:
         config["checkpoint_path"] = ckpt_path
 
@@ -444,7 +447,7 @@ def evaluate_scene(
     scene_id = scene_name_floor.split('_')[0]
     floor = int(scene_name_floor.split('_')[1])
 
-    planner_floorplan_path = os.path.join("datasets", "scenes_117", "test", scene_name_floor, "floorplan.png")
+    planner_floorplan_path = os.path.join(config["testdataset"], scene_name_floor, "planner_floorplan.png")
     model_floorplan_path = os.path.join(config["testdataset"], scene_name_floor, "floorplan.png")
     if floor == 0:
         travers_path = os.path.join(config["trav_maps_path"], scene_id, 'floor_trav_test_0_modified.png')

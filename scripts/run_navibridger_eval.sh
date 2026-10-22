@@ -35,5 +35,5 @@ echo "[$(date --iso-8601=seconds)] Service cgroup: $(cat /proc/self/cgroup | tr 
     --traj_per_scene "${TRAJ_PER_SCENE}"
 
 echo "[$(date --iso-8601=seconds)] Evaluation finished; calculating 3x3 SR/SPL metrics"
-"${PYTHON_BIN}" results/evaluate.py --exp_name "${EXP_NAME}"
+"${PYTHON_BIN}" results/evaluate.py --exp_name "${EXP_NAME}" --config "${CONFIG}"
 echo "[$(date --iso-8601=seconds)] Pipeline completed"

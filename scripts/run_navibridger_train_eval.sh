@@ -44,5 +44,5 @@ echo "[$(date --iso-8601=seconds)] Training finished; starting evaluation with $
     --traj_per_scene "${TRAJ_PER_SCENE}"
 
 echo "[$(date --iso-8601=seconds)] Evaluation finished; calculating 3x3 SR/SPL metrics"
-"${PYTHON_BIN}" results/evaluate.py --exp_name "${EXP_NAME}"
+"${PYTHON_BIN}" results/evaluate.py --exp_name "${EXP_NAME}" --config experiments/alpha_0p7_depth_route_full.yaml
 echo "[$(date --iso-8601=seconds)] Pipeline completed"

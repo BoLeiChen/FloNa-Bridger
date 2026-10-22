@@ -72,7 +72,7 @@ class flona_Dataset(Dataset):
         self._build_caches()
         self.floorplan_cache = {}
         self.planner_split = os.path.basename(os.path.normpath(self.data_folder))
-        self.planner_floorplan_root = os.path.join("datasets", "scenes_117", self.planner_split)
+        self.planner_floorplan_root = self.data_folder
         self.astar_local_cond_cache: Dict[str, np.ndarray] = {}
         self.walkable_map_cache: Dict[str, np.ndarray] = {}
         self._build_astar_local_cond_caches()
@@ -290,7 +290,7 @@ class flona_Dataset(Dataset):
         return positions, yaw
 
     def _get_planner_floorplan_path(self, scene_name: str) -> str:
-        return os.path.join(self.planner_floorplan_root, scene_name, "floorplan.png")
+        return os.path.join(self.planner_floorplan_root, scene_name, "planner_floorplan.png")
 
     def _get_walkable_map(self, scene_name: str) -> np.ndarray:
         if scene_name not in self.walkable_map_cache:

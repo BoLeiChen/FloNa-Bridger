@@ -1,3 +1,4 @@
+data_root: data
 project_name: VGCNav
 run_name: navibridger_astar_bridge_localcond_10step
 
@@ -77,8 +78,6 @@ image_size: [96, 96]
 obs_image_size: [98, 98]
 floorplan_image_size: [96, 96]
 datasets:
-  data_folder: datasets_96/scenes_117
-  trav_map_folder: datasets_96/trav_maps
   trav_patch_radius_px: 200
   trav_use: True
   end_slack: 3

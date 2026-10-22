@@ -6,24 +6,32 @@ PointGoal navigation: dataset preparation, training and V3 evaluation. Run all c
 
 The prepared Gibson-based dataset contains **67 training and 50 evaluation scene-floor entries**. Full evaluation uses 10 trajectories per test entry (500 episodes). Scene lists are in [training/pointgoal_v3.yaml](training/pointgoal_v3.yaml) and [experiments/alpha_0p7_depth_route_full.yaml](experiments/alpha_0p7_depth_route_full.yaml).
 
-Prepare or symlink the following directories:
+Training, navigation and metric aggregation all read **one root**, `data_root: data`, set in the training and evaluation YAML files:
 
 ```text
-datasets_96/
+data/
   scenes_117/{train,test}/<scene_floor>/
-    floorplan.png
-    traj_<id>/                 # trajectory .npy and RGB images
+    floorplan.png             # model input (preserve prepared resolution)
+    planner_floorplan.png     # original planner map; do not resize/overwrite
+    traj_<id>/                # trajectory .npy and RGB images
   trav_maps/
     floor_shapes.npy
     <scene>/floor_trav_test_0_modified.png
     <scene_floor>/floor_trav_test_<floor>_modified.png
-datasets/scenes_117/{train,test}/<scene_floor>/
-  floorplan.png
-  traj_<id>/traj_<id>.npy       # reference trajectories for evaluation
-iGibson/igibson/data/g_dataset/<scene>/  # Gibson meshes and floors.txt
+iGibson/igibson/data/g_dataset/<scene>/  # simulator meshes and floors.txt
 ```
 
-`datasets_96` provides model inputs; `datasets` provides planner floorplans and scoring references. Keep their scene/trajectory IDs consistent and allow write access for generated caches. The loader's required image/trajectory conventions are defined in [model/flona_dataset.py](model/flona_dataset.py) and [model/data_utils.py](model/data_utils.py). **Prepared demonstrations, scene assets and navigation checkpoints are not included; raw Gibson meshes alone are insufficient.** Obtain the prepared data separately before training. The recorded evaluation task IDs are in [experiments/pointgoal_v3_results.json](experiments/pointgoal_v3_results.json).
+**Prepared demonstrations and scene assets are not included; raw Gibson meshes alone are insufficient.** Obtain the prepared data separately. The loader's image/trajectory conventions are in [model/flona_dataset.py](model/flona_dataset.py) and [model/data_utils.py](model/data_utils.py). The recorded 500 evaluation tasks are in [experiments/pointgoal_v3_results.json](experiments/pointgoal_v3_results.json).
+
+If you already have the legacy `datasets_96` and `datasets` directories, run the migration after installing the environment below:
+
+```bash
+python scripts/prepare_dataset.py \
+  --model-root /path/to/datasets_96 --reference-root /path/to/datasets \
+  --output data --copy
+```
+
+This creates a standalone directory for the configured 67/50 scene-floor split, preserves both floorplans and verifies that evaluation reference trajectories match. Omit `--copy` for a space-saving symlink layout (keep the source directories). Source data is never changed; the output must not already exist. Image/index/A* caches are rebuilt on first training, so the new directory must be writable. For another location, update `data_root` in both training and evaluation configs. Simulator assets remain under iGibson and are not duplicated.
 
 ## Training
 

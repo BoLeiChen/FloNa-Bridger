@@ -76,3 +76,7 @@ external/
 *.ckpt
 *.tar
 *.tar.gz
+
+# Unified dataset root
+/data/
+/data

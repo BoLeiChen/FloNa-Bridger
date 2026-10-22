@@ -1,5 +1,6 @@
 import os
 import argparse
+import yaml
 import numpy as np
 import csv
 from datetime import datetime
@@ -42,7 +43,10 @@ def judge_success(data, collision_th, suc_dis, shortest_traj):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp_name", type=str, default="vgc", help="Name of the experiment folder in results/")
+    parser.add_argument("--config", default="experiments/alpha_0p7_depth_route_full.yaml", help="Evaluation config containing data_root")
     args = parser.parse_args()
+    with open(args.config) as f:
+        data_root = yaml.safe_load(f)["data_root"]
 
     result_dir = os.path.join("results/exps", args.exp_name)
     traj_dir = os.path.join(result_dir, "trajectory")
@@ -97,7 +101,7 @@ def main():
                 traj_name = f"{parts[2]}_{parts[3]}"
                 
                 # Ground truth path
-                shortest_traj_path = f"datasets/scenes_117/test/{scene_floor}/{traj_name}/{traj_name}.npy"
+                shortest_traj_path = os.path.join(data_root, "scenes_117", "test", scene_floor, traj_name, traj_name + ".npy")
                 if not os.path.exists(shortest_traj_path):
                     continue
                 

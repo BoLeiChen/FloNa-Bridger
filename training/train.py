@@ -38,9 +38,10 @@ from train_eval_loop import train_eval_loop_flona, load_model
 def main(config):
     # ==============================Dataset==============================
     data_config = config["datasets"]
+    data_root = config["data_root"]
     train_dataset = flona_Dataset(
-        data_folder=os.path.join(data_config["data_folder"], "train"),
-        trav_folder=data_config["trav_map_folder"],
+        data_folder=os.path.join(data_root, "scenes_117", "train"),
+        trav_folder=os.path.join(data_root, "trav_maps"),
         scene_names=data_config['scene_names'],
         obs_image_size=tuple(config["obs_image_size"]),          # 224x224 for DINOv2
         floorplan_image_size=tuple(config["floorplan_image_size"]),  # 96x96 for EfficientNet
@@ -53,8 +54,8 @@ def main(config):
         planner_free_thresh=float(config["planner_free_thresh"]),
     )
     test_dataset = flona_Dataset(
-        data_folder=os.path.join(data_config["data_folder"], "test"),
-        trav_folder=data_config["trav_map_folder"],
+        data_folder=os.path.join(data_root, "scenes_117", "test"),
+        trav_folder=os.path.join(data_root, "trav_maps"),
         scene_names=data_config['scene_test_names'],
         obs_image_size=tuple(config["obs_image_size"]),          # 224x224 for DINOv2
         floorplan_image_size=tuple(config["floorplan_image_size"]),  # 96x96 for EfficientNet
