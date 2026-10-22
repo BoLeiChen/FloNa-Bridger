@@ -6,32 +6,35 @@ PointGoal navigation: dataset preparation, training and V3 evaluation. Run all c
 
 The prepared Gibson-based dataset contains **67 training and 50 evaluation scene-floor entries**. Full evaluation uses 10 trajectories per test entry (500 episodes). Scene lists are in [training/pointgoal_v3.yaml](training/pointgoal_v3.yaml) and [experiments/alpha_0p7_depth_route_full.yaml](experiments/alpha_0p7_depth_route_full.yaml).
 
-Training, navigation and metric aggregation all read **one root**, `data_root: data`, set in the training and evaluation YAML files:
+Download the prepared data from [chenbolei/FloNaBridger-Gibson on Hugging Face](https://huggingface.co/datasets/chenbolei/FloNaBridger-Gibson). The complete release contains **118 archives (about 29.65 GB)**. Allow at least **70 GB** for archives and extracted files. Wait until the dataset repository contains `manifest.json`; it is published only after all shards have been uploaded and verified.
+
+After installing the environment below, run these commands from the code repository root. The first download checks release readiness; subsequent steps run only if it succeeds:
+
+```bash
+python -m pip install "huggingface_hub==0.36.2"
+hf download chenbolei/FloNaBridger-Gibson manifest.json \
+  --repo-type dataset --local-dir ../FloNaBridger-Gibson && \
+hf download chenbolei/FloNaBridger-Gibson \
+  --repo-type dataset --local-dir ../FloNaBridger-Gibson && \
+python ../FloNaBridger-Gibson/extract.py --destination .
+```
+
+The extraction script verifies each archive's SHA-256 and creates `data/`. It refuses to overwrite an existing `data/` directory; use a fresh destination when needed. Training, navigation and scoring all use `data_root: data` in their YAML configurations:
 
 ```text
 data/
   scenes_117/{train,test}/<scene_floor>/
-    floorplan.png             # model input (preserve prepared resolution)
-    planner_floorplan.png     # original planner map; do not resize/overwrite
+    floorplan.png             # model input
+    planner_floorplan.png     # original planner map; preserve its resolution
     traj_<id>/                # trajectory .npy and RGB images
   trav_maps/
     floor_shapes.npy
-    <scene>/floor_trav_test_0_modified.png
-    <scene_floor>/floor_trav_test_<floor>_modified.png
-iGibson/igibson/data/g_dataset/<scene>/  # simulator meshes and floors.txt
+    ... traversability maps ...
 ```
 
-**Prepared demonstrations and scene assets are not included; raw Gibson meshes alone are insufficient.** Obtain the prepared data separately. The loader's image/trajectory conventions are in [model/flona_dataset.py](model/flona_dataset.py) and [model/data_utils.py](model/data_utils.py). The recorded 500 evaluation tasks are in [experiments/pointgoal_v3_results.json](experiments/pointgoal_v3_results.json).
+Keep both floorplans. Image/index/A* caches are rebuilt on first training, so `data/` must be writable. If using another location, change `data_root` in both training and evaluation configs. The fixed 500 evaluation tasks are listed in [experiments/pointgoal_v3_results.json](experiments/pointgoal_v3_results.json).
 
-If you already have the legacy `datasets_96` and `datasets` directories, run the migration after installing the environment below:
-
-```bash
-python scripts/prepare_dataset.py \
-  --model-root /path/to/datasets_96 --reference-root /path/to/datasets \
-  --output data --copy
-```
-
-This creates a standalone directory for the configured 67/50 scene-floor split, preserves both floorplans and verifies that evaluation reference trajectories match. Omit `--copy` for a space-saving symlink layout (keep the source directories). Source data is never changed; the output must not already exist. Image/index/A* caches are rebuilt on first training, so the new directory must be writable. For another location, update `data_root` in both training and evaluation configs. Simulator assets remain under iGibson and are not duplicated.
+**Gibson scene meshes and model weights are not included in the dataset.** Install simulator assets separately under `iGibson/igibson/data/g_dataset/`, and prepare pretrained weights as described below.
 
 ## Training
 
