@@ -59,7 +59,15 @@ def prepare(model_root, reference_root, output, copy=False, scene_lists=None, ev
         transfer(scene / 'floorplan.png', dest / 'floorplan.png')
         transfer(reference / 'floorplan.png', dest / 'planner_floorplan.png')
         for traj in trajectories:
-            transfer(traj, dest / traj.name)
+            if copy:
+                target = dest / traj.name
+                target.mkdir()
+                shutil.copy2(traj / (traj.name + '.npy'), target / (traj.name + '.npy'))
+                for frame in traj.glob('*.png'):
+                    if frame.stem.isdigit():
+                        shutil.copy2(frame, target / frame.name)
+            else:
+                transfer(traj, dest / traj.name)
         # Old LMDB keys contain old paths. Rebuild image/index/A* caches under
         # the new root rather than copying stale scene-level caches.
     return len(entries)

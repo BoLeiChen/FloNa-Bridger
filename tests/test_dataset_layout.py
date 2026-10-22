@@ -25,6 +25,10 @@ def fixture_data(tmp_path):
 @pytest.mark.parametrize('copy', [False, True])
 def test_unified_layout_preserves_both_floorplans_and_references(tmp_path, copy):
     model, original = fixture_data(tmp_path)
+    cache = model / 'scenes_117/train/room_0/traj_1/shortest_paths'
+    cache.mkdir()
+    (cache / 'unused.npy').write_bytes(b'legacy cache')
+    Image.new('RGB', (96, 96)).save(cache.parent / '00000.png')
     output = tmp_path / 'data'
     assert module.prepare(model, original, output, copy=copy) == 2
     scene = output / 'scenes_117/test/room_0'
@@ -32,6 +36,9 @@ def test_unified_layout_preserves_both_floorplans_and_references(tmp_path, copy)
     assert Image.open(scene / 'planner_floorplan.png').size == (256, 256)
     np.testing.assert_array_equal(np.load(scene / 'traj_1/traj_1.npy'), np.load(original / 'scenes_117/test/room_0/traj_1/traj_1.npy'))
     assert (scene / 'traj_1').is_symlink() == (not copy)
+    prepared = output / 'scenes_117/train/room_0/traj_1'
+    assert (prepared / '00000.png').is_file()
+    assert (prepared / 'shortest_paths').exists() == (not copy)
     with pytest.raises(FileExistsError):
         module.prepare(model, original, output)
 
