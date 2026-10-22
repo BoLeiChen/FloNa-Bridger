@@ -1,5 +1,6 @@
 import os
 import argparse
+import json
 import yaml
 import numpy as np
 import csv
@@ -44,6 +45,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp_name", type=str, default="vgc", help="Name of the experiment folder in results/")
     parser.add_argument("--config", default="experiments/alpha_0p7_depth_route_full.yaml", help="Evaluation config containing data_root")
+    parser.add_argument("--require-full-benchmark", action="store_true", help="Fail unless all fixed 500 episodes and references are valid")
     args = parser.parse_args()
     with open(args.config) as f:
         data_root = yaml.safe_load(f)["data_root"]
@@ -53,7 +55,7 @@ def main():
     
     if not os.path.exists(traj_dir):
         print(f"Error: Directory {traj_dir} not found.")
-        return
+        raise SystemExit(1)
 
     # Configuration for evaluation
     # Report SR/SPL for every requested collision-budget and goal-distance pair.
@@ -68,7 +70,20 @@ def main():
     traj_files = [f for f in os.listdir(traj_dir) if f.endswith(".txt")]
     if not traj_files:
         print("No trajectory files found.")
-        return
+        raise SystemExit(1)
+
+    if args.require_full_benchmark:
+        with open("experiments/pointgoal_v3_results.json") as stream:
+            tasks = json.load(stream)["tasks"]
+        expected = {task["filename"] for task in tasks}
+        if set(traj_files) != expected:
+            raise ValueError(f"Benchmark mismatch: {len(expected - set(traj_files))} missing, {len(set(traj_files) - expected)} extra episodes")
+        for task in tasks:
+            rollout = np.loadtxt(os.path.join(traj_dir, task["filename"]), ndmin=2)
+            ref = os.path.join(data_root, "scenes_117", "test", task["scene"], f"traj_{task['id']}", f"traj_{task['id']}.npy")
+            reference = np.load(ref)
+            if rollout.size == 0 or rollout.shape[1] < 5 or not np.isfinite(rollout).all() or len(reference) < 2 or not np.isfinite(reference).all():
+                raise ValueError("Invalid benchmark trajectory: " + task["filename"])
 
     print(f"\nEvaluating experiment: {args.exp_name}")
     print(f"Found {len(traj_files)} trajectories.")

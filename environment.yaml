@@ -28,6 +28,7 @@ dependencies:
       - warmup-scheduler
       - einops==0.8.1
       - pyastar2d
+      - gym==0.26.2
       - pytest
 
 # iGibson is installed from a compatible local checkout after environment creation:

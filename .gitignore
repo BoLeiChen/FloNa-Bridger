@@ -80,3 +80,7 @@ external/
 # Unified dataset root
 /data/
 /data
+
+# Also ignore local asset-directory symlinks.
+/checkpoints
+/external
