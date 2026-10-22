@@ -43,8 +43,8 @@ Keep both floorplans. Image/index/A* caches are rebuilt on first training, so `d
 Use Linux with an NVIDIA GPU; the recorded setup used an RTX 3090, Python 3.8.20, PyTorch 2.4.1 and CUDA 12.4.
 
 ```bash
-git clone https://github.com/BoLeiChen/FloNavBridger.git
-cd FloNavBridger
+git clone https://github.com/BoLeiChen/FloNa-Bridger.git
+cd FloNa-Bridger
 conda env create -f environment.yaml
 conda activate vgcnav
 python -m pip install -e .
