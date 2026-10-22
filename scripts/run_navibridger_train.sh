@@ -12,11 +12,12 @@ readonly RUN_NAME="$1"
 readonly PIPELINE_LOG="$2"
 
 cd "${PROJECT_DIR}"
+mkdir -p "$(dirname "${PIPELINE_LOG}")"
 exec > >(tee -a "${PIPELINE_LOG}") 2>&1
 
 echo "[$(date --iso-8601=seconds)] Starting training: ${RUN_NAME}"
 echo "[$(date --iso-8601=seconds)] Cgroup: $(cat /proc/self/cgroup | tr '\n' ' ')"
 "${PYTHON_BIN}" training/train.py \
-    --config training/flona_unloc_pose.yaml \
+    --config training/pointgoal_v3.yaml \
     --run_name "${RUN_NAME}"
 echo "[$(date --iso-8601=seconds)] Training completed"

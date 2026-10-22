@@ -1,4 +1,4 @@
-checkpoint_path: /home/cbl/VGCNav-depth-guidance/checkpoints/navibridger_alpha_0p7_ema5.pth
+checkpoint_path: checkpoints/navibridger_alpha_0p7_ema5.pth
 testdataset: datasets_96/scenes_117/test/
 traindataset: datasets_96/scenes_117/train/
 trav_maps_path: datasets_96/trav_maps/

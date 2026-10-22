@@ -260,7 +260,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config",
         "-c",
-        default="flona.yaml",
+        default="training/pointgoal_v3.yaml",
         type=str,
         help="Path to the config file in train_config folder",
     )

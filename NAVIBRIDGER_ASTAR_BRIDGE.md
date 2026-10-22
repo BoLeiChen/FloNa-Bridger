@@ -5,12 +5,8 @@ process with a VE denoising diffusion bridge.  It deliberately leaves VGCNav's
 dataset tuple, visual/floorplan encoder, pose inputs, action normalization and
 trajectory output unchanged.
 
-The non-bridge baseline is kept identical to
-`codex/dpt-gt-astar-heading-realign` (DPT 98, floorplan conditioning,
-near-goal terminal padding, paper perturbation schedule, collision logging and
-the optional 150-degree A* heading realignment). Only the diffusion process
-and its A* endpoint/local condition integration differ. Heading realignment is
-disabled by default.
+This release uses the six-epoch PointGoal configuration in
+`training/pointgoal_v3.yaml`. Heading realignment is disabled.
 
 For every sample, the existing A* local waypoints are differenced and
 normalized with the same action statistics as the target trajectory.  This is
@@ -29,13 +25,15 @@ The global visual condition keeps the original final DINO layer as its semantic
 navigation backbone.  Shallow DINO patches from the current frame retain their
 full 7x7 layout and are attention-pooled into a residual correction.  A learned
 gate uses both visual summaries and the clean-path turn risk, but is not forced
-to be monotonic in curvature.  Its residual contribution is capped at 0.25 and
+to be monotonic in curvature.  Its residual contribution is capped at 0.7 and
 zero-initialized, so optimization starts exactly at the deep-feature baseline.
 
 Turn risk uses a mask-aware smoothed path and headings spanning three waypoint
 intervals.  It contains no maximum-turn term and is computed before training
 perturbations.  Training path uncertainty is spatially correlated, limited to
-2 cm plus a 1 cm global translation standard deviation, and copies the last
+a nominal 2 cm deformation amplitude on a 40-epoch sinusoidal schedule
+(about 4.67 mm by epoch six), plus a 1 cm Gaussian global translation
+standard deviation, and copies the last
 valid perturbation into terminal padding.  ImageNet normalization is applied by
 the dataset transform exactly once; the DINO encoder does not normalize that
 tensor a second time.

@@ -1,207 +1,283 @@
-# FloNavBridger
+# FloNavBridger: PointGoal with V3 depth and route guidance
 
-FloNavBridger is a visual goal-navigation system that refines a metric A* path
-with a NaviBridger-style VE denoising bridge. A* supplies both the bridge
-endpoint and a persistent per-waypoint condition; visual history, a floorplan,
-pose/goal inputs, and a conditional 1-D UNet produce an executable local
-trajectory.
+This release contains the PointGoal training and evaluation pipeline from
+`fix/depth-route-guidance-v3` (evaluated source commit
+`4ef718452be31f8d7a4de65c5862ed1ed7f6c98d`). It adds portable configurations and
+launchers around that implementation. ImageGoal/ObjectGoal localization and
+selection are not part of this release.
 
-This README describes the stable main branch. The consistency-flow experiments
-live on the feature/consistency-flow-bridge and
-feature/consistency-flow-bridge-v2 branches and have branch-specific READMEs.
+## Method and released configuration
 
-## Method
+A floorplan A* path initializes a variance-exploding diffusion bridge and supplies
+persistent five-channel local conditioning (XY, sine/cosine of turn angle, validity).
+Five RGB observations, floorplan features, pose and destination supply the global
+condition. A frozen DINOv2 backbone provides shallow and deep visual features,
+with a learned path-conditioned residual gate capped at 0.7.
 
-~~~text
-RGB history ── frozen DINOv2 ───────────┐
-current RGB + floorplan ─ EfficientNet ─┼─ Transformer ─ global condition
-current pose + goal pose ───────────────┘
+The policy predicts 32 future 2-D waypoints. Each navigation cycle averages 32
+samples and executes the first 16 waypoints. V3 estimates metric depth from RGB
+using Depth Anything V2 Hypersim ViT-S; it does not feed simulator depth into the
+policy. A local map with 2.5 cm resolution and a 16-observation history provides
+sampling-time guidance. The objective combines collision, additional unknown-space
+exposure, additional map-boundary exposure, shape change and route progress, with
+weights **1, 1, 1, 0.1, 0.25**, respectively. Guidance starts at noise levels at or
+below 0.5. Each correction is limited to 1 cm and accepted only when the total
+objective and collision cost do not increase. This is approximate multi-cost
+refinement, not a hard collision guarantee or a collision-only energy.
 
-A* local path ─ bridge endpoint xT ─────┐
-               └─ UNet local condition ┼─ VE/Heun bridge sampler ─ trajectory
-global condition ───────────────────────┘
-~~~
-
-The default policy predicts 32 local 2-D waypoints from five RGB observations.
-The A* local condition contains position, turn geometry, and a validity mask.
-Training adds correlated path/pose perturbations instead of independent
-waypoint jitter.
-
-Frozen DINOv2 deep features provide semantic context. A bounded,
-zero-initialized shallow spatial residual is activated by a robust, mask-aware
-summary of A* curvature, helping the policy retain local obstacle detail around
-turns without replacing the deep representation. See
-[NAVIBRIDGER_ASTAR_BRIDGE.md](NAVIBRIDGER_ASTAR_BRIDGE.md) for the bridge,
-conditioning, and perturbation details.
-
-## Repository layout
-
-~~~text
-model/                  policy, vision encoder, dataset and NaviBridge
-training/               train/eval loop and experiment configurations
-scripts/                train/evaluate and tmux launchers
-results/evaluate.py     SR/SPL and collision-budget aggregation
-test_vgcnav_gtpos.py    iGibson closed-loop navigation evaluation
-tests/                  bridge, A* conditioning and perturbation tests
-depth_anything_v2/      minimal local DINOv2 implementation
-diffusion_policy/       ConditionalUnet1D dependency and retained license
-~~~
-
-Datasets, checkpoints, logs, iGibson assets, and external reference
-repositories are intentionally excluded from Git.
+See [bridge details](NAVIBRIDGER_ASTAR_BRIDGE.md),
+[V3 map/refinement details](experiments/depth_route_method.json) and
+[full evaluation configuration](experiments/alpha_0p7_depth_route_full.yaml).
 
 ## Environment
 
-The validated setup uses Python 3.8, PyTorch 2.4.1, CUDA 12.4, and an NVIDIA
-GPU.
+The recorded local environment uses **one NVIDIA GeForce RTX 3090**, Python
+3.8.20, PyTorch 2.4.1 and CUDA 12.4. Training requires CUDA; closed-loop evaluation
+also requires a working NVIDIA OpenGL/EGL installation.
 
-~~~bash
+```bash
+git clone https://github.com/BoLeiChen/FloNavBridger.git
+cd FloNavBridger
 conda env create -f environment.yaml
 conda activate vgcnav
 python -m pip install -e .
-~~~
+```
 
-Closed-loop evaluation additionally requires a compatible local iGibson
-checkout:
+Install iGibson separately. The local checkout used commit
+`7d9598278b95ec1039e1f4366c66b45346521e44`:
 
-~~~bash
+```bash
+git clone https://github.com/StanfordVL/iGibson.git iGibson
+git -C iGibson checkout 7d9598278b95ec1039e1f4366c66b45346521e44
 python -m pip install -e ./iGibson
-~~~
+```
 
-xFormers is optional. The simulator entry point uses the legacy Gym API
-provided by the compatible iGibson checkout.
+Follow iGibson's installation instructions for its native dependencies and obtain
+the Gibson scene assets separately. The environment YAML does not install those
+assets or system graphics libraries. Use a compatible legacy Gym environment for
+this iGibson checkout. xFormers is optional.
 
-## External assets and data
+All commands below run from the repository root. Launchers honor `PYTHON_BIN`.
+For headless execution, configure your NVIDIA EGL installation; launchers default
+`__EGL_VENDOR_LIBRARY_FILENAMES` to `/usr/share/glvnd/egl_vendor.d/10_nvidia.json`
+but preserve an explicitly supplied value.
 
-Place the Depth Anything V2 ViT-S checkpoint at:
+## Required data
 
-~~~text
-checkpoints/depth_anything_v2_vits.pth
-~~~
+The code expects the project's prepared PointGoal demonstrations and floorplans;
+a raw Gibson mesh download alone is insufficient. This release does not contain
+the demonstration dataset, a dataset-generation pipeline, meshes or trained
+navigation weights. Prepare the following directories, or symlink existing ones:
 
-Expected layout:
-
-~~~text
+```text
 datasets_96/
-├── scenes_117/
-│   ├── train/<scene>/{traj*,floorplan.png,dataset_<scene>_new.lmdb,...}
-│   └── test/<scene>/{traj*,floorplan.png,dataset_<scene>_new.lmdb,...}
-└── trav_maps/<scene>/...
+  scenes_117/
+    train/<scene_floor>/floorplan.png
+    train/<scene_floor>/traj_<id>/traj_<id>.npy
+    train/<scene_floor>/traj_<id>/... RGB images ...
+    test/<scene_floor>/... same structure ...
+  trav_maps/
+    floor_shapes.npy
+    <scene>/floor_trav_test_0_modified.png
+    <scene_floor>/floor_trav_test_<floor>_modified.png
+datasets/
+  scenes_117/train/<scene_floor>/floorplan.png
+  scenes_117/test/<scene_floor>/floorplan.png
+  scenes_117/test/<scene_floor>/traj_<id>/traj_<id>.npy
+iGibson/igibson/data/g_dataset/<scene>/... meshes and floors.txt ...
+```
 
-datasets/scenes_117/{train,test}/<scene>/floorplan.png
-iGibson/igibson/data/g_dataset/<scene>/...
-~~~
+`datasets_96` supplies resized model inputs; `datasets` supplies planner floorplans
+and reference trajectories for metric aggregation. Both must describe the same
+scenes and trajectories. The dataset loader creates image LMDB and A* caches when
+needed, so the prepared dataset directory must be writable. See
+[dataset loader](model/flona_dataset.py) and [data utilities](model/data_utils.py)
+for image naming and trajectory conventions. The training configuration lists 67
+training and 50 evaluation **scene-floor entries**, not 117 distinct buildings.
 
-datasets_96 contains resized offline samples and A* caches. datasets supplies
-planner floorplans and reference trajectories. g_dataset contains Gibson scene
-meshes. Large directories may be mounted elsewhere and symlinked into the
-repository root.
+For exact benchmark task identity, see the 500 `(scene, id)` pairs in
+[pointgoal_v3_results.json](experiments/pointgoal_v3_results.json). Evaluation
+selects the ten lowest numeric trajectory IDs available in each configured test
+scene-floor; this must match the recorded task list when reproducing the result.
 
-## Training
+## Required pretrained assets
 
-Review paths, GPU IDs, batch size, and W&B settings in
-training/flona_unloc_pose.yaml. The full NaviBridge parameter block is
-documented in training/navibridger_astar_bridge.yaml.
+Create `checkpoints/` and install the official metric-depth source at the pinned
+commit:
 
-Direct launch:
+```bash
+mkdir -p checkpoints external
+git clone https://github.com/DepthAnything/Depth-Anything-V2.git external/Depth-Anything-V2
+git -C external/Depth-Anything-V2 checkout a561b849ebae10a6f5ef49e26c83cbbcd36c71bf
+curl -fL --retry 3 -o checkpoints/depth_anything_v2_vits.pth \
+  https://huggingface.co/depth-anything/Depth-Anything-V2-Small/resolve/main/depth_anything_v2_vits.pth
+curl -fL --retry 3 -o checkpoints/depth_anything_v2_metric_hypersim_vits.pth \
+  https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Small/resolve/main/depth_anything_v2_metric_hypersim_vits.pth
+```
 
-~~~bash
-python training/train.py \
-  --config training/flona_unloc_pose.yaml \
-  --run_name navibridger_run
-~~~
+The first checkpoint initializes the policy's frozen visual backbone and is also
+required when constructing the policy for evaluation. The second is the separate
+RGB-to-metric-depth estimator. Its recorded SHA-256 is:
 
-Launcher:
+```text
+b782898d8a3e8be1f639de33837ed85e9b4b73e40f8f5e5cd99067588d722545
+```
 
-~~~bash
-scripts/run_navibridger_train.sh navibridger_run logs/navibridger_run.log
-~~~
+The navigation checkpoint used for the reported V3 result is named
+`checkpoints/navibridger_alpha_0p7_ema5.pth`, with SHA-256:
 
-tmux launcher:
+```text
+f400884f9f8c91c6ba4e4c5614ae63dcab0976fe1e77b0d5953000c79cac8b2f
+```
 
-~~~bash
-scripts/run_training_in_tmux.sh
-~~~
+That navigation checkpoint is **not included** in Git. Train one using the next
+section or supply the original checkpoint separately. A newly trained checkpoint
+need not reproduce the exact recorded scores. Weight provenance is recorded in
+[baseline_provenance.json](experiments/baseline_provenance.json) and
+[depth_model_provenance.json](experiments/depth_model_provenance.json).
 
-Checkpoints are written to logs/VGCNav/<run_name>/; use the EMA checkpoint for
-closed-loop comparison.
+## Train the PointGoal bridge
 
-## Closed-loop evaluation
+The [released training configuration](training/pointgoal_v3.yaml) preserves the
+archived six-epoch, gate-0.7 experiment settings. W&B is disabled by default.
 
-Quick single-scene evaluation:
+```bash
+python training/train.py --config training/pointgoal_v3.yaml --run_name pointgoal_v3
+```
 
-~~~bash
+Alternatively, capture console output with the launcher:
+
+```bash
+bash scripts/run_navibridger_train.sh pointgoal_v3 logs/pointgoal_v3_train.log
+```
+
+Use a fresh run name: training refuses to overwrite an existing run directory.
+Important settings:
+
+| Setting | Value |
+|---|---|
+| Epochs / batch size / data-loader workers | 6 / 64 / 8 |
+| Optimizer | AdamW, learning rate 1e-4, weight decay 0.01 |
+| Adam moments / epsilon | (0.9, 0.999) / 1e-8 |
+| Learning-rate schedule | Cosine over 6 epochs; no warm-up |
+| Parameter EMA | 0.999 |
+| Objective | 0.999 bridge loss + 0.001 distance MSE |
+| Bridge sigma min / max / data | 0.002 / 10 / 0.5 |
+| Sampling levels / Karras exponent / churn ratio | 10 / 7 / 0.33 |
+| Seed | 0 |
+| Checkpoint interval | Every 2 epochs |
+
+Checkpoints are saved under `logs/VGCNav/pointgoal_v3/`; the sixth-epoch EMA is
+`ema_5.pth` (zero-based epoch index). The active loop does not apply gradient
+clipping despite a retained legacy `max_norm` configuration field. Legacy selector
+and negative-sampling fields in the archived YAML do not add selector training to
+this PointGoal loss. V3 depth/route refinement is applied only at inference and
+requires no retraining. Pose/path perturbation and visual fusion details are in
+the bridge documentation and source.
+
+## Evaluate
+
+Use the same trained checkpoint for baseline and guided comparisons. The examples
+below use the checkpoint produced above; `--ckpt_path` overrides the YAML path.
+Start with a small scene subset:
+
+```bash
 python test_vgcnav_gtpos.py \
-  --config test_vgc_navibridger.yaml \
-  --ckpt_path logs/VGCNav/<run_name>/ema_19.pth \
-  --exp_name <experiment_name>
-~~~
+  --config experiments/alpha_0p7_depth_route_smoke.yaml \
+  --ckpt_path logs/VGCNav/pointgoal_v3/ema_5.pth \
+  --exp_name pointgoal_v3_smoke --traj_per_scene 1
+```
 
-Full 50-scene evaluation followed by metric aggregation:
+Run all 50 scene-floor entries, ten episodes each, then aggregate metrics:
 
-~~~bash
-scripts/run_navibridger_eval.sh \
-  test_vgc_navibridger_full.yaml \
-  logs/VGCNav/<run_name>/ema_19.pth \
-  <experiment_name> \
-  logs/<experiment_name>.log
-~~~
+```bash
+NUM_WORKERS=1 TRAJ_PER_SCENE=10 bash scripts/run_navibridger_eval.sh \
+  experiments/alpha_0p7_depth_route_full.yaml \
+  logs/VGCNav/pointgoal_v3/ema_5.pth \
+  pointgoal_v3_full logs/pointgoal_v3_full.log
+```
 
-The combined launcher trains, evaluates, and aggregates metrics:
+The launcher runs both navigation and `results/evaluate.py`. Increase workers
+only if GPU memory permits; all workers may share the configured GPU. To score an
+existing run separately:
 
-~~~bash
-scripts/run_navibridger_train_eval.sh <run_name>
-~~~
+```bash
+python results/evaluate.py --exp_name pointgoal_v3_full
+```
 
-The reported 3x3 table is formed by three collision budgets (10, 30, and 50)
-and three arrival thresholds (0.25, 0.30, and 0.35). Keep the trajectory count,
-candidate count, execution horizon, collision accounting mode, and recovery
-policy identical when comparing runs.
+For the paired baseline, use the identical command with
+`experiments/alpha_0p7_baseline_full.yaml` and a different experiment/log name.
+`alpha_0p7_depth_bridge_full.yaml` retains the earlier depth-guidance ablation.
+A complete train-then-V3-evaluate pipeline is also available:
 
-### Collision recovery
+```bash
+bash scripts/run_navibridger_train_eval.sh pointgoal_v3_pipeline
+```
 
-test_vgc_navibridger_full.yaml uses deterministic repeated clockwise/right
-45-degree recovery turns. test_vgc_navibridger_full_randomturn.yaml chooses
-left or right once per collision. The options are:
+Output locations:
 
-~~~yaml
-collision_accounting_mode: legacy       # or movement_only
-recovery_turn_mode: continuous_right    # or random
-~~~
+```text
+logs/VGCNav/<run_name>/              training checkpoints
+results/exps/<exp_name>/trajectory/ recorded trajectories
+results/exps/<exp_name>/image/      rendered diagnostics
+evaluation_summary.csv             standard aggregate metrics
+```
 
-Do not mix recovery configurations inside one benchmark comparison.
+Use a new experiment name for each run to avoid mixing old and new trajectories.
+For a full benchmark, check that exactly 500 trajectory files were produced and
+that aggregation reports 500 valid episodes. The scorer skips missing reference
+files, so a successful process exit alone does not establish benchmark completeness.
 
-## Tests
+### Protocol and recorded results
 
-Run the complete maintained suite:
+The standard report uses goal distance **0.30 m**, collision threshold **10**, and
+legacy collision accounting (including recovery flags). The online rollout stop
+radius is 0.25 m. Offline scoring checks budget exhaustion before goal arrival at
+each logged state. The evaluator also prints a 3x3 threshold sweep, but those
+numbers must not be mixed with the standard result. Recovery uses repeated
+clockwise 45-degree turns; A* heading realignment is disabled. Paired episode
+seeds are derived from seed 0 and scene/trajectory identity. SPL uses the stored
+reference-trajectory length.
 
-~~~bash
+| Paired 500-episode experiment | SR | SPL |
+|---|---:|---:|
+| Frozen bridge baseline | 88.60% | 85.74% |
+| Earlier depth bridge | 88.60% | 85.94% |
+| **V3 depth + route guidance** | **89.80%** | **86.41%** |
+
+These are archived results, not a fresh benchmark of this packaging commit. The
+older independent baseline run scored 89.00% / 86.13%; use the paired baseline
+above when measuring V3's improvement. V4 experiments are not included.
+
+## Validation and repository layout
+
+```bash
 python -m pytest -q tests
-~~~
+```
 
-Focused NaviBridge checks:
+The tests exercise A* conditions, the bridge, depth geometry, floor calibration,
+route energy and bounded refinement acceptance. They do not replace a complete
+GPU/iGibson navigation benchmark.
 
-~~~bash
-python -m pytest -q \
-  tests/test_navibridger.py \
-  tests/test_astar_local_condition_features.py
-~~~
+```text
+model/                  policy, dataset, bridge and V3 guidance
+training/               training entrypoint, loop and six-epoch config
+experiments/            portable evaluation configs, provenance and results
+scripts/                portable training/evaluation launchers
+results/evaluate.py     offline SR/SPL scoring
+test_vgcnav_gtpos.py    iGibson closed-loop evaluation
+tests/                  maintained unit tests
+depth_anything_v2/      policy visual backbone dependency
+diffusion_policy/       conditional U-Net dependency
+```
 
-## Reproducibility notes
+Datasets, weights, simulator assets, external source checkouts and generated logs
+are excluded from Git. This release retains the V3 model and guidance behavior;
+local driver workarounds and scripts requiring historical log directories have
+been removed.
 
-- NaviBridge mode requires a valid A* prior and matching five-channel local
-  condition.
-- A* cache filenames encode context size, prediction horizon, end slack, and
-  planner resolution; changing these settings rebuilds caches.
-- DINOv2 remains frozen; trainable shallow fusion starts from the deep-feature
-  baseline.
-- Train and test must use the same trajectory representation, bridge mode,
-  network dimensions, and collision/recovery settings.
-- Record the Git commit, YAML configuration, random seed, checkpoint path, and
-  result directory for each benchmark.
+## Acknowledgements and licenses
 
-## Acknowledgements
-
-This project builds on FLoNa/VGCNav, Diffusion Policy, Depth Anything V2/DINOv2,
-NaviBridger, and iGibson. Retained third-party components remain under their
-included licenses. See [LICENSE](LICENSE) for this repository's license.
+This project builds on FLoNa/VGCNav, NaviBridger, Diffusion Policy, Depth Anything
+V2/DINOv2 and iGibson. See [LICENSE](LICENSE) and the retained third-party license
+notices. External datasets and pretrained weights retain their upstream terms.

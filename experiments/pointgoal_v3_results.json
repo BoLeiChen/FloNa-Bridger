@@ -1,0 +1,2534 @@
+{
+  "source_commit": "4ef718452be31f8d7a4de65c5862ed1ed7f6c98d",
+  "protocol": {
+    "collision_threshold": 10,
+    "arrival_threshold_m": 0.3
+  },
+  "episodes": 500,
+  "paired_episode_seed": 0,
+  "summary": {
+    "baseline": {
+      "sr": 0.886,
+      "spl": 0.8574081605992505,
+      "collision_rate": 0.248,
+      "mean_collisions": 1.69,
+      "episodes": 500
+    },
+    "depth_bridge": {
+      "sr": 0.886,
+      "spl": 0.859370555797129,
+      "collision_rate": 0.256,
+      "mean_collisions": 1.71,
+      "episodes": 500
+    },
+    "depth_route": {
+      "sr": 0.898,
+      "spl": 0.8640953907986193,
+      "collision_rate": 0.256,
+      "mean_collisions": 1.664,
+      "episodes": 500
+    }
+  },
+  "tasks": [
+    {
+      "scene": "Azusa_0",
+      "id": 181,
+      "filename": "Azusa_0_traj_181.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 182,
+      "filename": "Azusa_0_traj_182.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 183,
+      "filename": "Azusa_0_traj_183.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 184,
+      "filename": "Azusa_0_traj_184.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 185,
+      "filename": "Azusa_0_traj_185.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 186,
+      "filename": "Azusa_0_traj_186.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 187,
+      "filename": "Azusa_0_traj_187.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 188,
+      "filename": "Azusa_0_traj_188.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 189,
+      "filename": "Azusa_0_traj_189.txt"
+    },
+    {
+      "scene": "Azusa_0",
+      "id": 190,
+      "filename": "Azusa_0_traj_190.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 181,
+      "filename": "Caruthers_0_traj_181.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 182,
+      "filename": "Caruthers_0_traj_182.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 183,
+      "filename": "Caruthers_0_traj_183.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 184,
+      "filename": "Caruthers_0_traj_184.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 185,
+      "filename": "Caruthers_0_traj_185.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 186,
+      "filename": "Caruthers_0_traj_186.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 187,
+      "filename": "Caruthers_0_traj_187.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 188,
+      "filename": "Caruthers_0_traj_188.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 189,
+      "filename": "Caruthers_0_traj_189.txt"
+    },
+    {
+      "scene": "Caruthers_0",
+      "id": 190,
+      "filename": "Caruthers_0_traj_190.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 181,
+      "filename": "Dunmor_0_traj_181.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 182,
+      "filename": "Dunmor_0_traj_182.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 183,
+      "filename": "Dunmor_0_traj_183.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 184,
+      "filename": "Dunmor_0_traj_184.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 185,
+      "filename": "Dunmor_0_traj_185.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 186,
+      "filename": "Dunmor_0_traj_186.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 187,
+      "filename": "Dunmor_0_traj_187.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 188,
+      "filename": "Dunmor_0_traj_188.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 189,
+      "filename": "Dunmor_0_traj_189.txt"
+    },
+    {
+      "scene": "Dunmor_0",
+      "id": 190,
+      "filename": "Dunmor_0_traj_190.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 181,
+      "filename": "Hainesburg_0_traj_181.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 182,
+      "filename": "Hainesburg_0_traj_182.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 183,
+      "filename": "Hainesburg_0_traj_183.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 184,
+      "filename": "Hainesburg_0_traj_184.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 185,
+      "filename": "Hainesburg_0_traj_185.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 186,
+      "filename": "Hainesburg_0_traj_186.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 187,
+      "filename": "Hainesburg_0_traj_187.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 188,
+      "filename": "Hainesburg_0_traj_188.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 189,
+      "filename": "Hainesburg_0_traj_189.txt"
+    },
+    {
+      "scene": "Hainesburg_0",
+      "id": 190,
+      "filename": "Hainesburg_0_traj_190.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 163,
+      "filename": "Lathrup_0_traj_163.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 164,
+      "filename": "Lathrup_0_traj_164.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 165,
+      "filename": "Lathrup_0_traj_165.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 166,
+      "filename": "Lathrup_0_traj_166.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 167,
+      "filename": "Lathrup_0_traj_167.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 168,
+      "filename": "Lathrup_0_traj_168.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 169,
+      "filename": "Lathrup_0_traj_169.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 170,
+      "filename": "Lathrup_0_traj_170.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 171,
+      "filename": "Lathrup_0_traj_171.txt"
+    },
+    {
+      "scene": "Lathrup_0",
+      "id": 172,
+      "filename": "Lathrup_0_traj_172.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 181,
+      "filename": "Samuels_0_traj_181.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 182,
+      "filename": "Samuels_0_traj_182.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 183,
+      "filename": "Samuels_0_traj_183.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 184,
+      "filename": "Samuels_0_traj_184.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 185,
+      "filename": "Samuels_0_traj_185.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 186,
+      "filename": "Samuels_0_traj_186.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 187,
+      "filename": "Samuels_0_traj_187.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 188,
+      "filename": "Samuels_0_traj_188.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 189,
+      "filename": "Samuels_0_traj_189.txt"
+    },
+    {
+      "scene": "Samuels_0",
+      "id": 190,
+      "filename": "Samuels_0_traj_190.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 181,
+      "filename": "Spotswood_0_traj_181.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 182,
+      "filename": "Spotswood_0_traj_182.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 183,
+      "filename": "Spotswood_0_traj_183.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 184,
+      "filename": "Spotswood_0_traj_184.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 185,
+      "filename": "Spotswood_0_traj_185.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 186,
+      "filename": "Spotswood_0_traj_186.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 187,
+      "filename": "Spotswood_0_traj_187.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 188,
+      "filename": "Spotswood_0_traj_188.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 189,
+      "filename": "Spotswood_0_traj_189.txt"
+    },
+    {
+      "scene": "Spotswood_0",
+      "id": 190,
+      "filename": "Spotswood_0_traj_190.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 163,
+      "filename": "Anaheim_0_traj_163.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 164,
+      "filename": "Anaheim_0_traj_164.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 165,
+      "filename": "Anaheim_0_traj_165.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 166,
+      "filename": "Anaheim_0_traj_166.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 167,
+      "filename": "Anaheim_0_traj_167.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 168,
+      "filename": "Anaheim_0_traj_168.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 169,
+      "filename": "Anaheim_0_traj_169.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 170,
+      "filename": "Anaheim_0_traj_170.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 171,
+      "filename": "Anaheim_0_traj_171.txt"
+    },
+    {
+      "scene": "Anaheim_0",
+      "id": 172,
+      "filename": "Anaheim_0_traj_172.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 181,
+      "filename": "Ballou_0_traj_181.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 182,
+      "filename": "Ballou_0_traj_182.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 183,
+      "filename": "Ballou_0_traj_183.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 184,
+      "filename": "Ballou_0_traj_184.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 185,
+      "filename": "Ballou_0_traj_185.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 186,
+      "filename": "Ballou_0_traj_186.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 187,
+      "filename": "Ballou_0_traj_187.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 188,
+      "filename": "Ballou_0_traj_188.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 189,
+      "filename": "Ballou_0_traj_189.txt"
+    },
+    {
+      "scene": "Ballou_0",
+      "id": 190,
+      "filename": "Ballou_0_traj_190.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 181,
+      "filename": "Connellsville_0_traj_181.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 182,
+      "filename": "Connellsville_0_traj_182.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 183,
+      "filename": "Connellsville_0_traj_183.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 184,
+      "filename": "Connellsville_0_traj_184.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 185,
+      "filename": "Connellsville_0_traj_185.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 186,
+      "filename": "Connellsville_0_traj_186.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 187,
+      "filename": "Connellsville_0_traj_187.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 188,
+      "filename": "Connellsville_0_traj_188.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 189,
+      "filename": "Connellsville_0_traj_189.txt"
+    },
+    {
+      "scene": "Connellsville_0",
+      "id": 190,
+      "filename": "Connellsville_0_traj_190.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 181,
+      "filename": "Stilwell_0_traj_181.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 182,
+      "filename": "Stilwell_0_traj_182.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 183,
+      "filename": "Stilwell_0_traj_183.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 184,
+      "filename": "Stilwell_0_traj_184.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 185,
+      "filename": "Stilwell_0_traj_185.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 186,
+      "filename": "Stilwell_0_traj_186.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 187,
+      "filename": "Stilwell_0_traj_187.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 188,
+      "filename": "Stilwell_0_traj_188.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 189,
+      "filename": "Stilwell_0_traj_189.txt"
+    },
+    {
+      "scene": "Stilwell_0",
+      "id": 190,
+      "filename": "Stilwell_0_traj_190.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 163,
+      "filename": "Andover_0_traj_163.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 164,
+      "filename": "Andover_0_traj_164.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 165,
+      "filename": "Andover_0_traj_165.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 166,
+      "filename": "Andover_0_traj_166.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 167,
+      "filename": "Andover_0_traj_167.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 168,
+      "filename": "Andover_0_traj_168.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 169,
+      "filename": "Andover_0_traj_169.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 170,
+      "filename": "Andover_0_traj_170.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 171,
+      "filename": "Andover_0_traj_171.txt"
+    },
+    {
+      "scene": "Andover_0",
+      "id": 172,
+      "filename": "Andover_0_traj_172.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 163,
+      "filename": "Beach_0_traj_163.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 164,
+      "filename": "Beach_0_traj_164.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 165,
+      "filename": "Beach_0_traj_165.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 166,
+      "filename": "Beach_0_traj_166.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 167,
+      "filename": "Beach_0_traj_167.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 168,
+      "filename": "Beach_0_traj_168.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 169,
+      "filename": "Beach_0_traj_169.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 170,
+      "filename": "Beach_0_traj_170.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 171,
+      "filename": "Beach_0_traj_171.txt"
+    },
+    {
+      "scene": "Beach_0",
+      "id": 172,
+      "filename": "Beach_0_traj_172.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 163,
+      "filename": "Cooperstown_0_traj_163.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 164,
+      "filename": "Cooperstown_0_traj_164.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 165,
+      "filename": "Cooperstown_0_traj_165.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 166,
+      "filename": "Cooperstown_0_traj_166.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 167,
+      "filename": "Cooperstown_0_traj_167.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 168,
+      "filename": "Cooperstown_0_traj_168.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 169,
+      "filename": "Cooperstown_0_traj_169.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 170,
+      "filename": "Cooperstown_0_traj_170.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 171,
+      "filename": "Cooperstown_0_traj_171.txt"
+    },
+    {
+      "scene": "Cooperstown_0",
+      "id": 172,
+      "filename": "Cooperstown_0_traj_172.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 163,
+      "filename": "Elmira_0_traj_163.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 164,
+      "filename": "Elmira_0_traj_164.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 165,
+      "filename": "Elmira_0_traj_165.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 166,
+      "filename": "Elmira_0_traj_166.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 167,
+      "filename": "Elmira_0_traj_167.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 168,
+      "filename": "Elmira_0_traj_168.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 169,
+      "filename": "Elmira_0_traj_169.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 170,
+      "filename": "Elmira_0_traj_170.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 171,
+      "filename": "Elmira_0_traj_171.txt"
+    },
+    {
+      "scene": "Elmira_0",
+      "id": 172,
+      "filename": "Elmira_0_traj_172.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 163,
+      "filename": "Hillsdale_0_traj_163.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 164,
+      "filename": "Hillsdale_0_traj_164.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 165,
+      "filename": "Hillsdale_0_traj_165.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 166,
+      "filename": "Hillsdale_0_traj_166.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 167,
+      "filename": "Hillsdale_0_traj_167.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 168,
+      "filename": "Hillsdale_0_traj_168.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 169,
+      "filename": "Hillsdale_0_traj_169.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 170,
+      "filename": "Hillsdale_0_traj_170.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 171,
+      "filename": "Hillsdale_0_traj_171.txt"
+    },
+    {
+      "scene": "Hillsdale_0",
+      "id": 172,
+      "filename": "Hillsdale_0_traj_172.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 181,
+      "filename": "Maryhill_0_traj_181.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 182,
+      "filename": "Maryhill_0_traj_182.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 183,
+      "filename": "Maryhill_0_traj_183.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 184,
+      "filename": "Maryhill_0_traj_184.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 185,
+      "filename": "Maryhill_0_traj_185.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 186,
+      "filename": "Maryhill_0_traj_186.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 187,
+      "filename": "Maryhill_0_traj_187.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 188,
+      "filename": "Maryhill_0_traj_188.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 189,
+      "filename": "Maryhill_0_traj_189.txt"
+    },
+    {
+      "scene": "Maryhill_0",
+      "id": 190,
+      "filename": "Maryhill_0_traj_190.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 163,
+      "filename": "Nimmons_0_traj_163.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 164,
+      "filename": "Nimmons_0_traj_164.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 165,
+      "filename": "Nimmons_0_traj_165.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 166,
+      "filename": "Nimmons_0_traj_166.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 167,
+      "filename": "Nimmons_0_traj_167.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 168,
+      "filename": "Nimmons_0_traj_168.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 169,
+      "filename": "Nimmons_0_traj_169.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 170,
+      "filename": "Nimmons_0_traj_170.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 171,
+      "filename": "Nimmons_0_traj_171.txt"
+    },
+    {
+      "scene": "Nimmons_0",
+      "id": 172,
+      "filename": "Nimmons_0_traj_172.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 181,
+      "filename": "Rancocas_0_traj_181.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 182,
+      "filename": "Rancocas_0_traj_182.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 183,
+      "filename": "Rancocas_0_traj_183.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 184,
+      "filename": "Rancocas_0_traj_184.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 185,
+      "filename": "Rancocas_0_traj_185.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 186,
+      "filename": "Rancocas_0_traj_186.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 187,
+      "filename": "Rancocas_0_traj_187.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 188,
+      "filename": "Rancocas_0_traj_188.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 189,
+      "filename": "Rancocas_0_traj_189.txt"
+    },
+    {
+      "scene": "Rancocas_0",
+      "id": 190,
+      "filename": "Rancocas_0_traj_190.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 163,
+      "filename": "Sasakwa_0_traj_163.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 164,
+      "filename": "Sasakwa_0_traj_164.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 165,
+      "filename": "Sasakwa_0_traj_165.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 166,
+      "filename": "Sasakwa_0_traj_166.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 167,
+      "filename": "Sasakwa_0_traj_167.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 168,
+      "filename": "Sasakwa_0_traj_168.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 169,
+      "filename": "Sasakwa_0_traj_169.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 170,
+      "filename": "Sasakwa_0_traj_170.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 171,
+      "filename": "Sasakwa_0_traj_171.txt"
+    },
+    {
+      "scene": "Sasakwa_0",
+      "id": 172,
+      "filename": "Sasakwa_0_traj_172.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 181,
+      "filename": "Stokes_0_traj_181.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 182,
+      "filename": "Stokes_0_traj_182.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 183,
+      "filename": "Stokes_0_traj_183.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 184,
+      "filename": "Stokes_0_traj_184.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 185,
+      "filename": "Stokes_0_traj_185.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 186,
+      "filename": "Stokes_0_traj_186.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 187,
+      "filename": "Stokes_0_traj_187.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 188,
+      "filename": "Stokes_0_traj_188.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 189,
+      "filename": "Stokes_0_traj_189.txt"
+    },
+    {
+      "scene": "Stokes_0",
+      "id": 190,
+      "filename": "Stokes_0_traj_190.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 163,
+      "filename": "Andover_1_traj_163.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 164,
+      "filename": "Andover_1_traj_164.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 165,
+      "filename": "Andover_1_traj_165.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 166,
+      "filename": "Andover_1_traj_166.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 167,
+      "filename": "Andover_1_traj_167.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 168,
+      "filename": "Andover_1_traj_168.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 169,
+      "filename": "Andover_1_traj_169.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 170,
+      "filename": "Andover_1_traj_170.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 171,
+      "filename": "Andover_1_traj_171.txt"
+    },
+    {
+      "scene": "Andover_1",
+      "id": 172,
+      "filename": "Andover_1_traj_172.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 181,
+      "filename": "Bolton_0_traj_181.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 182,
+      "filename": "Bolton_0_traj_182.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 183,
+      "filename": "Bolton_0_traj_183.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 184,
+      "filename": "Bolton_0_traj_184.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 185,
+      "filename": "Bolton_0_traj_185.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 186,
+      "filename": "Bolton_0_traj_186.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 187,
+      "filename": "Bolton_0_traj_187.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 188,
+      "filename": "Bolton_0_traj_188.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 189,
+      "filename": "Bolton_0_traj_189.txt"
+    },
+    {
+      "scene": "Bolton_0",
+      "id": 190,
+      "filename": "Bolton_0_traj_190.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 163,
+      "filename": "Hillsdale_1_traj_163.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 164,
+      "filename": "Hillsdale_1_traj_164.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 165,
+      "filename": "Hillsdale_1_traj_165.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 166,
+      "filename": "Hillsdale_1_traj_166.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 167,
+      "filename": "Hillsdale_1_traj_167.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 168,
+      "filename": "Hillsdale_1_traj_168.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 169,
+      "filename": "Hillsdale_1_traj_169.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 170,
+      "filename": "Hillsdale_1_traj_170.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 171,
+      "filename": "Hillsdale_1_traj_171.txt"
+    },
+    {
+      "scene": "Hillsdale_1",
+      "id": 172,
+      "filename": "Hillsdale_1_traj_172.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 181,
+      "filename": "Matoaca_0_traj_181.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 182,
+      "filename": "Matoaca_0_traj_182.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 183,
+      "filename": "Matoaca_0_traj_183.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 184,
+      "filename": "Matoaca_0_traj_184.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 185,
+      "filename": "Matoaca_0_traj_185.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 186,
+      "filename": "Matoaca_0_traj_186.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 187,
+      "filename": "Matoaca_0_traj_187.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 188,
+      "filename": "Matoaca_0_traj_188.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 189,
+      "filename": "Matoaca_0_traj_189.txt"
+    },
+    {
+      "scene": "Matoaca_0",
+      "id": 190,
+      "filename": "Matoaca_0_traj_190.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 163,
+      "filename": "Norvelt_0_traj_163.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 164,
+      "filename": "Norvelt_0_traj_164.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 165,
+      "filename": "Norvelt_0_traj_165.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 166,
+      "filename": "Norvelt_0_traj_166.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 167,
+      "filename": "Norvelt_0_traj_167.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 168,
+      "filename": "Norvelt_0_traj_168.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 169,
+      "filename": "Norvelt_0_traj_169.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 170,
+      "filename": "Norvelt_0_traj_170.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 171,
+      "filename": "Norvelt_0_traj_171.txt"
+    },
+    {
+      "scene": "Norvelt_0",
+      "id": 172,
+      "filename": "Norvelt_0_traj_172.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 181,
+      "filename": "Reyno_0_traj_181.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 182,
+      "filename": "Reyno_0_traj_182.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 183,
+      "filename": "Reyno_0_traj_183.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 184,
+      "filename": "Reyno_0_traj_184.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 185,
+      "filename": "Reyno_0_traj_185.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 186,
+      "filename": "Reyno_0_traj_186.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 187,
+      "filename": "Reyno_0_traj_187.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 188,
+      "filename": "Reyno_0_traj_188.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 189,
+      "filename": "Reyno_0_traj_189.txt"
+    },
+    {
+      "scene": "Reyno_0",
+      "id": 190,
+      "filename": "Reyno_0_traj_190.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 181,
+      "filename": "Sawpit_0_traj_181.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 182,
+      "filename": "Sawpit_0_traj_182.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 183,
+      "filename": "Sawpit_0_traj_183.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 184,
+      "filename": "Sawpit_0_traj_184.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 185,
+      "filename": "Sawpit_0_traj_185.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 186,
+      "filename": "Sawpit_0_traj_186.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 187,
+      "filename": "Sawpit_0_traj_187.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 188,
+      "filename": "Sawpit_0_traj_188.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 189,
+      "filename": "Sawpit_0_traj_189.txt"
+    },
+    {
+      "scene": "Sawpit_0",
+      "id": 190,
+      "filename": "Sawpit_0_traj_190.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 163,
+      "filename": "Annawan_0_traj_163.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 164,
+      "filename": "Annawan_0_traj_164.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 165,
+      "filename": "Annawan_0_traj_165.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 166,
+      "filename": "Annawan_0_traj_166.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 167,
+      "filename": "Annawan_0_traj_167.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 168,
+      "filename": "Annawan_0_traj_168.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 169,
+      "filename": "Annawan_0_traj_169.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 170,
+      "filename": "Annawan_0_traj_170.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 171,
+      "filename": "Annawan_0_traj_171.txt"
+    },
+    {
+      "scene": "Annawan_0",
+      "id": 172,
+      "filename": "Annawan_0_traj_172.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 181,
+      "filename": "Brentsville_0_traj_181.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 182,
+      "filename": "Brentsville_0_traj_182.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 183,
+      "filename": "Brentsville_0_traj_183.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 184,
+      "filename": "Brentsville_0_traj_184.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 185,
+      "filename": "Brentsville_0_traj_185.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 186,
+      "filename": "Brentsville_0_traj_186.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 187,
+      "filename": "Brentsville_0_traj_187.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 188,
+      "filename": "Brentsville_0_traj_188.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 189,
+      "filename": "Brentsville_0_traj_189.txt"
+    },
+    {
+      "scene": "Brentsville_0",
+      "id": 190,
+      "filename": "Brentsville_0_traj_190.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 181,
+      "filename": "Dauberville_0_traj_181.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 182,
+      "filename": "Dauberville_0_traj_182.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 183,
+      "filename": "Dauberville_0_traj_183.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 184,
+      "filename": "Dauberville_0_traj_184.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 185,
+      "filename": "Dauberville_0_traj_185.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 186,
+      "filename": "Dauberville_0_traj_186.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 187,
+      "filename": "Dauberville_0_traj_187.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 188,
+      "filename": "Dauberville_0_traj_188.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 189,
+      "filename": "Dauberville_0_traj_189.txt"
+    },
+    {
+      "scene": "Dauberville_0",
+      "id": 190,
+      "filename": "Dauberville_0_traj_190.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 181,
+      "filename": "Ewansville_0_traj_181.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 182,
+      "filename": "Ewansville_0_traj_182.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 183,
+      "filename": "Ewansville_0_traj_183.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 184,
+      "filename": "Ewansville_0_traj_184.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 185,
+      "filename": "Ewansville_0_traj_185.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 186,
+      "filename": "Ewansville_0_traj_186.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 187,
+      "filename": "Ewansville_0_traj_187.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 188,
+      "filename": "Ewansville_0_traj_188.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 189,
+      "filename": "Ewansville_0_traj_189.txt"
+    },
+    {
+      "scene": "Ewansville_0",
+      "id": 190,
+      "filename": "Ewansville_0_traj_190.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 163,
+      "filename": "Hominy_0_traj_163.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 164,
+      "filename": "Hominy_0_traj_164.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 165,
+      "filename": "Hominy_0_traj_165.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 166,
+      "filename": "Hominy_0_traj_166.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 167,
+      "filename": "Hominy_0_traj_167.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 168,
+      "filename": "Hominy_0_traj_168.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 169,
+      "filename": "Hominy_0_traj_169.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 170,
+      "filename": "Hominy_0_traj_170.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 171,
+      "filename": "Hominy_0_traj_171.txt"
+    },
+    {
+      "scene": "Hominy_0",
+      "id": 172,
+      "filename": "Hominy_0_traj_172.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 181,
+      "filename": "Swormville_0_traj_181.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 182,
+      "filename": "Swormville_0_traj_182.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 183,
+      "filename": "Swormville_0_traj_183.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 184,
+      "filename": "Swormville_0_traj_184.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 185,
+      "filename": "Swormville_0_traj_185.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 186,
+      "filename": "Swormville_0_traj_186.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 187,
+      "filename": "Swormville_0_traj_187.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 188,
+      "filename": "Swormville_0_traj_188.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 189,
+      "filename": "Swormville_0_traj_189.txt"
+    },
+    {
+      "scene": "Swormville_0",
+      "id": 190,
+      "filename": "Swormville_0_traj_190.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 163,
+      "filename": "Applewold_1_traj_163.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 164,
+      "filename": "Applewold_1_traj_164.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 165,
+      "filename": "Applewold_1_traj_165.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 166,
+      "filename": "Applewold_1_traj_166.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 167,
+      "filename": "Applewold_1_traj_167.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 168,
+      "filename": "Applewold_1_traj_168.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 169,
+      "filename": "Applewold_1_traj_169.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 170,
+      "filename": "Applewold_1_traj_170.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 171,
+      "filename": "Applewold_1_traj_171.txt"
+    },
+    {
+      "scene": "Applewold_1",
+      "id": 172,
+      "filename": "Applewold_1_traj_172.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 163,
+      "filename": "Brevort_0_traj_163.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 164,
+      "filename": "Brevort_0_traj_164.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 165,
+      "filename": "Brevort_0_traj_165.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 166,
+      "filename": "Brevort_0_traj_166.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 167,
+      "filename": "Brevort_0_traj_167.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 168,
+      "filename": "Brevort_0_traj_168.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 169,
+      "filename": "Brevort_0_traj_169.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 170,
+      "filename": "Brevort_0_traj_170.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 171,
+      "filename": "Brevort_0_traj_171.txt"
+    },
+    {
+      "scene": "Brevort_0",
+      "id": 172,
+      "filename": "Brevort_0_traj_172.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 181,
+      "filename": "Dauberville_1_traj_181.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 182,
+      "filename": "Dauberville_1_traj_182.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 183,
+      "filename": "Dauberville_1_traj_183.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 184,
+      "filename": "Dauberville_1_traj_184.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 185,
+      "filename": "Dauberville_1_traj_185.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 186,
+      "filename": "Dauberville_1_traj_186.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 187,
+      "filename": "Dauberville_1_traj_187.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 188,
+      "filename": "Dauberville_1_traj_188.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 189,
+      "filename": "Dauberville_1_traj_189.txt"
+    },
+    {
+      "scene": "Dauberville_1",
+      "id": 190,
+      "filename": "Dauberville_1_traj_190.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 181,
+      "filename": "Ewansville_1_traj_181.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 182,
+      "filename": "Ewansville_1_traj_182.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 183,
+      "filename": "Ewansville_1_traj_183.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 184,
+      "filename": "Ewansville_1_traj_184.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 185,
+      "filename": "Ewansville_1_traj_185.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 186,
+      "filename": "Ewansville_1_traj_186.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 187,
+      "filename": "Ewansville_1_traj_187.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 188,
+      "filename": "Ewansville_1_traj_188.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 189,
+      "filename": "Ewansville_1_traj_189.txt"
+    },
+    {
+      "scene": "Ewansville_1",
+      "id": 190,
+      "filename": "Ewansville_1_traj_190.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 163,
+      "filename": "Hominy_1_traj_163.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 164,
+      "filename": "Hominy_1_traj_164.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 165,
+      "filename": "Hominy_1_traj_165.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 166,
+      "filename": "Hominy_1_traj_166.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 167,
+      "filename": "Hominy_1_traj_167.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 168,
+      "filename": "Hominy_1_traj_168.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 169,
+      "filename": "Hominy_1_traj_169.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 170,
+      "filename": "Hominy_1_traj_170.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 171,
+      "filename": "Hominy_1_traj_171.txt"
+    },
+    {
+      "scene": "Hominy_1",
+      "id": 172,
+      "filename": "Hominy_1_traj_172.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 181,
+      "filename": "Mobridge_0_traj_181.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 182,
+      "filename": "Mobridge_0_traj_182.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 183,
+      "filename": "Mobridge_0_traj_183.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 184,
+      "filename": "Mobridge_0_traj_184.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 185,
+      "filename": "Mobridge_0_traj_185.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 186,
+      "filename": "Mobridge_0_traj_186.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 187,
+      "filename": "Mobridge_0_traj_187.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 188,
+      "filename": "Mobridge_0_traj_188.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 189,
+      "filename": "Mobridge_0_traj_189.txt"
+    },
+    {
+      "scene": "Mobridge_0",
+      "id": 190,
+      "filename": "Mobridge_0_traj_190.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 163,
+      "filename": "Pablo_0_traj_163.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 164,
+      "filename": "Pablo_0_traj_164.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 165,
+      "filename": "Pablo_0_traj_165.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 166,
+      "filename": "Pablo_0_traj_166.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 167,
+      "filename": "Pablo_0_traj_167.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 168,
+      "filename": "Pablo_0_traj_168.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 169,
+      "filename": "Pablo_0_traj_169.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 170,
+      "filename": "Pablo_0_traj_170.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 171,
+      "filename": "Pablo_0_traj_171.txt"
+    },
+    {
+      "scene": "Pablo_0",
+      "id": 172,
+      "filename": "Pablo_0_traj_172.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 181,
+      "filename": "Rockport_0_traj_181.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 182,
+      "filename": "Rockport_0_traj_182.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 183,
+      "filename": "Rockport_0_traj_183.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 184,
+      "filename": "Rockport_0_traj_184.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 185,
+      "filename": "Rockport_0_traj_185.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 186,
+      "filename": "Rockport_0_traj_186.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 187,
+      "filename": "Rockport_0_traj_187.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 188,
+      "filename": "Rockport_0_traj_188.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 189,
+      "filename": "Rockport_0_traj_189.txt"
+    },
+    {
+      "scene": "Rockport_0",
+      "id": 190,
+      "filename": "Rockport_0_traj_190.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 181,
+      "filename": "Shingler_0_traj_181.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 182,
+      "filename": "Shingler_0_traj_182.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 183,
+      "filename": "Shingler_0_traj_183.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 184,
+      "filename": "Shingler_0_traj_184.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 185,
+      "filename": "Shingler_0_traj_185.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 186,
+      "filename": "Shingler_0_traj_186.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 187,
+      "filename": "Shingler_0_traj_187.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 188,
+      "filename": "Shingler_0_traj_188.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 189,
+      "filename": "Shingler_0_traj_189.txt"
+    },
+    {
+      "scene": "Shingler_0",
+      "id": 190,
+      "filename": "Shingler_0_traj_190.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 181,
+      "filename": "Woonsocket_0_traj_181.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 182,
+      "filename": "Woonsocket_0_traj_182.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 183,
+      "filename": "Woonsocket_0_traj_183.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 184,
+      "filename": "Woonsocket_0_traj_184.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 185,
+      "filename": "Woonsocket_0_traj_185.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 186,
+      "filename": "Woonsocket_0_traj_186.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 187,
+      "filename": "Woonsocket_0_traj_187.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 188,
+      "filename": "Woonsocket_0_traj_188.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 189,
+      "filename": "Woonsocket_0_traj_189.txt"
+    },
+    {
+      "scene": "Woonsocket_0",
+      "id": 190,
+      "filename": "Woonsocket_0_traj_190.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 181,
+      "filename": "Arkansaw_0_traj_181.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 182,
+      "filename": "Arkansaw_0_traj_182.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 183,
+      "filename": "Arkansaw_0_traj_183.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 184,
+      "filename": "Arkansaw_0_traj_184.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 185,
+      "filename": "Arkansaw_0_traj_185.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 186,
+      "filename": "Arkansaw_0_traj_186.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 187,
+      "filename": "Arkansaw_0_traj_187.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 188,
+      "filename": "Arkansaw_0_traj_188.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 189,
+      "filename": "Arkansaw_0_traj_189.txt"
+    },
+    {
+      "scene": "Arkansaw_0",
+      "id": 190,
+      "filename": "Arkansaw_0_traj_190.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 181,
+      "filename": "Pettigrew_0_traj_181.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 182,
+      "filename": "Pettigrew_0_traj_182.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 183,
+      "filename": "Pettigrew_0_traj_183.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 184,
+      "filename": "Pettigrew_0_traj_184.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 185,
+      "filename": "Pettigrew_0_traj_185.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 186,
+      "filename": "Pettigrew_0_traj_186.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 187,
+      "filename": "Pettigrew_0_traj_187.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 188,
+      "filename": "Pettigrew_0_traj_188.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 189,
+      "filename": "Pettigrew_0_traj_189.txt"
+    },
+    {
+      "scene": "Pettigrew_0",
+      "id": 190,
+      "filename": "Pettigrew_0_traj_190.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 181,
+      "filename": "Rosenberg_0_traj_181.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 182,
+      "filename": "Rosenberg_0_traj_182.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 183,
+      "filename": "Rosenberg_0_traj_183.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 184,
+      "filename": "Rosenberg_0_traj_184.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 185,
+      "filename": "Rosenberg_0_traj_185.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 186,
+      "filename": "Rosenberg_0_traj_186.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 187,
+      "filename": "Rosenberg_0_traj_187.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 188,
+      "filename": "Rosenberg_0_traj_188.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 189,
+      "filename": "Rosenberg_0_traj_189.txt"
+    },
+    {
+      "scene": "Rosenberg_0",
+      "id": 190,
+      "filename": "Rosenberg_0_traj_190.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 163,
+      "filename": "Sisters_0_traj_163.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 164,
+      "filename": "Sisters_0_traj_164.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 165,
+      "filename": "Sisters_0_traj_165.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 166,
+      "filename": "Sisters_0_traj_166.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 167,
+      "filename": "Sisters_0_traj_167.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 168,
+      "filename": "Sisters_0_traj_168.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 169,
+      "filename": "Sisters_0_traj_169.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 170,
+      "filename": "Sisters_0_traj_170.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 171,
+      "filename": "Sisters_0_traj_171.txt"
+    },
+    {
+      "scene": "Sisters_0",
+      "id": 172,
+      "filename": "Sisters_0_traj_172.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 163,
+      "filename": "Avonia_0_traj_163.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 164,
+      "filename": "Avonia_0_traj_164.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 165,
+      "filename": "Avonia_0_traj_165.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 166,
+      "filename": "Avonia_0_traj_166.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 167,
+      "filename": "Avonia_0_traj_167.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 168,
+      "filename": "Avonia_0_traj_168.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 169,
+      "filename": "Avonia_0_traj_169.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 170,
+      "filename": "Avonia_0_traj_170.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 171,
+      "filename": "Avonia_0_traj_171.txt"
+    },
+    {
+      "scene": "Avonia_0",
+      "id": 172,
+      "filename": "Avonia_0_traj_172.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 181,
+      "filename": "Capistrano_1_traj_181.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 182,
+      "filename": "Capistrano_1_traj_182.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 183,
+      "filename": "Capistrano_1_traj_183.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 184,
+      "filename": "Capistrano_1_traj_184.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 185,
+      "filename": "Capistrano_1_traj_185.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 186,
+      "filename": "Capistrano_1_traj_186.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 187,
+      "filename": "Capistrano_1_traj_187.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 188,
+      "filename": "Capistrano_1_traj_188.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 189,
+      "filename": "Capistrano_1_traj_189.txt"
+    },
+    {
+      "scene": "Capistrano_1",
+      "id": 190,
+      "filename": "Capistrano_1_traj_190.txt"
+    }
+  ]
+}

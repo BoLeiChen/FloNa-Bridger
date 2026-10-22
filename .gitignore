@@ -65,3 +65,14 @@ test_origin.yaml
 # Downloaded official depth source (pinned in experiments provenance)
 external/
 /iGibson
+
+# Credentials and additional generated artifacts
+.env
+.env.*
+*.pem
+*.key
+*.pth
+*.pt
+*.ckpt
+*.tar
+*.tar.gz

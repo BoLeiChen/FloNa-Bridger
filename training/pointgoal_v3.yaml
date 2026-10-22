@@ -5,7 +5,7 @@ run_name: navibridger_astar_bridge_localcond_10step
 use_wandb: False
 train: True
 batch_size: 64
-epochs: 20
+epochs: 6
 gpu_ids: [0]
 num_workers: 8
 lr: 1e-4
@@ -27,7 +27,7 @@ curvature_gate_horizon: 20
 curvature_stride: 3
 curvature_smoothing_window: 3
 use_shallow_visual_residual: true
-shallow_residual_alpha_max: 0.25
+shallow_residual_alpha_max: 0.7
 cond_predict_scale: False
 mha_num_attention_heads: 4
 mha_num_attention_layers: 4
@@ -93,4 +93,4 @@ num_images_log: 8
 pairwise_test_freq: 0
 eval_fraction: 0.1
 wandb_log_freq: 10
-eval_freq: 1
+eval_freq: 6

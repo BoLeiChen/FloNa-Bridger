@@ -2,7 +2,7 @@
   "branch": "main",
   "commit": "11f0f4be81fd6d27eddfa9de4c96313899d815ef",
   "alpha_max": 0.7,
-  "checkpoint": "/home/cbl/VGCNav/logs/VGCNav/navibridger_v5_gate_alpha_6ep_20260924_124856_alpha_0p7/ema_5.pth",
+  "checkpoint": "checkpoints/navibridger_alpha_0p7_ema5.pth",
   "checkpoint_sha256": "f400884f9f8c91c6ba4e4c5614ae63dcab0976fe1e77b0d5953000c79cac8b2f",
   "epochs": 6,
   "ema_epoch_index": 5,
@@ -11,5 +11,5 @@
   "spl": 0.8613,
   "collision_budget": 10,
   "arrival_threshold_m": 0.3,
-  "patch_source": "/home/cbl/VGCNav/logs/ablations/navibridger_v5_gate_alpha_6ep_20260924_124856/diagnostics.patch"
+  "training_config": "training/pointgoal_v3.yaml"
 }

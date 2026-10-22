@@ -10,13 +10,14 @@ readonly PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly PYTHON_BIN="${PYTHON_BIN:-python}"
 readonly NUM_WORKERS="${NUM_WORKERS:-1}"
 readonly TRAJ_PER_SCENE="${TRAJ_PER_SCENE:-10}"
-export __EGL_VENDOR_LIBRARY_FILENAMES="/usr/share/glvnd/egl_vendor.d/10_nvidia.json"
+export __EGL_VENDOR_LIBRARY_FILENAMES="${__EGL_VENDOR_LIBRARY_FILENAMES:-/usr/share/glvnd/egl_vendor.d/10_nvidia.json}"
 readonly CONFIG="$1"
 readonly CHECKPOINT="$2"
 readonly EXP_NAME="$3"
 readonly PIPELINE_LOG="$4"
 
 cd "${PROJECT_DIR}"
+mkdir -p "$(dirname "${PIPELINE_LOG}")"
 exec > >(tee -a "${PIPELINE_LOG}") 2>&1
 
 if [[ ! -s "${CHECKPOINT}" ]]; then

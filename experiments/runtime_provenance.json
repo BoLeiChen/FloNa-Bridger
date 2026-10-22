@@ -1,9 +1,0 @@
-{
-  "kernel_driver": "595.84",
-  "system_userspace": "595.99.02",
-  "private_userspace": "595.84",
-  "source": "https://us.download.nvidia.com/XFree86/Linux-x86_64/595.84/NVIDIA-Linux-x86_64-595.84.run",
-  "sha256": "99c404e52131bf27bca6da0268dcce3ebedc7a73ab174071a995cf1a6c5eba06",
-  "system_modified": false,
-  "egl_probe": "NVIDIA GeForce RTX 3090, EGL 1.5, OpenGL 4.6 NVIDIA 595.84"
-}

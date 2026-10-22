@@ -272,7 +272,7 @@ def parse_args():
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="test_vgc.yaml")
+    parser.add_argument("--config", type=str, default="experiments/alpha_0p7_depth_route_full.yaml")
     parser.add_argument("--exp_name", type=str, default=None)
     parser.add_argument("--ckpt_path", type=str, default=None)
     parser.add_argument(

@@ -1,4 +1,4 @@
-checkpoint_path: /home/cbl/VGCNav-depth-guidance/checkpoints/navibridger_alpha_0p7_ema5.pth
+checkpoint_path: checkpoints/navibridger_alpha_0p7_ema5.pth
 testdataset: datasets_96/scenes_117/test/
 traindataset: datasets_96/scenes_117/train/
 trav_maps_path: datasets_96/trav_maps/
@@ -116,8 +116,8 @@ gpu_ids:
 - 0
 depth_bridge_guidance:
   enabled: true
-  source_dir: /home/cbl/VGCNav-depth-guidance/external/Depth-Anything-V2
-  checkpoint: /home/cbl/VGCNav-depth-guidance/checkpoints/depth_anything_v2_metric_hypersim_vits.pth
+  source_dir: external/Depth-Anything-V2
+  checkpoint: checkpoints/depth_anything_v2_metric_hypersim_vits.pth
   input_size: 518
   camera_height: 0.85
   obstacle_height: 1.2
