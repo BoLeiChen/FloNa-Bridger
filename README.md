@@ -4,7 +4,7 @@ PointGoal navigation: dataset preparation, training and V3 evaluation. Run all c
 
 ## Dataset
 
-The prepared Gibson-based dataset contains **67 training and 50 evaluation scene-floor entries**. Full evaluation uses 10 trajectories per test entry (500 episodes). Scene lists are in [training/pointgoal_v3.yaml](training/pointgoal_v3.yaml) and [experiments/alpha_0p7_depth_route_full.yaml](experiments/alpha_0p7_depth_route_full.yaml).
+The prepared Gibson-based dataset contains **67 training and 50 evaluation scene-floor entries**. It contains **11,524 training trajectories (1,699,436 frames)** and **910 test trajectories (138,100 frames)**. Full evaluation uses 10 trajectories per test entry (500 episodes). Scene lists are in [training/pointgoal_v3.yaml](training/pointgoal_v3.yaml) and [experiments/alpha_0p7_depth_route_full.yaml](experiments/alpha_0p7_depth_route_full.yaml).
 
 Download the prepared data from [chenbolei/FloNaBridger-Gibson on Hugging Face](https://huggingface.co/datasets/chenbolei/FloNaBridger-Gibson). The complete release contains **118 archives (about 29.65 GB)**. Allow at least **70 GB** for archives and extracted files. The upload is complete; `manifest.json` records every archive hash.
 
