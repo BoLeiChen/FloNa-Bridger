@@ -1,0 +1,43 @@
+{
+  "audit_date": "2026-10-23",
+  "scope": {
+    "unit_tests": true,
+    "saved_full_evaluation_rescored": true,
+    "fresh_navigation_episodes": 1,
+    "fresh_full_evaluation": false,
+    "full_retraining": false,
+    "fresh_environment_install": false
+  },
+  "tested_runtime": {
+    "python": "3.8.20",
+    "torch": "2.0.1+cu117",
+    "gpu": "NVIDIA GeForce RTX 3090"
+  },
+  "guidance": "V3 route: collision, unknown, boundary, shape, motion and goal costs; not collision-only",
+  "checkpoint_availability": "Reference experiment weights are not hosted by this branch.",
+  "task": "pointgoal",
+  "reference_checkpoint_sha256": "764427dfe3fb163cf42fc2fd7e2e6fec83fd3253b86784a1641158ce9a5caf18",
+  "reference_episodes": 4084,
+  "historical_metrics": {
+    "SR": 0.6287952987267384,
+    "SPL_reference": 0.5877721571605267
+  },
+  "first_episode_rollout_matches_archive": true,
+  "historical_floor_height_issue": false,
+  "training_cache_check": {
+    "rebuilt_original_trajectories": 2,
+    "sources": [
+      "without_obj",
+      "with_obj"
+    ],
+    "decoded_fields_equal_to_server_cache": true,
+    "builder": "ObjectGoal release prepare_data.py with the shared cache encoder"
+  },
+  "evaluation_protocol": {
+    "simulator_shortest_path_collision_recovery": true,
+    "success_termination_uses_benchmark_ground_truth": true,
+    "seed": 0,
+    "seeding": "per scene; retain full within-scene episode order"
+  },
+  "unit_tests_passed": 75
+}

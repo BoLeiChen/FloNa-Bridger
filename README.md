@@ -79,3 +79,9 @@ To recompute metrics from saved rollouts:
 ```bash
 python scripts/score.py --output results/pointgoal_v3 --scenes-dir data/eval_without_obj/HM3D
 ```
+
+## Reproduction checks
+
+The supplied V3 route guidance includes collision, unknown-space, boundary, shape, motion and goal costs.
+
+The reference controller is identified in `config/reproduction_audit.json`. With that checkpoint, all 4,084 saved rollouts reproduce the archived metrics, and one fresh simulator rollout matches the archive exactly. Full retraining and a fresh full evaluation have not been repeated in this audit; a newly trained checkpoint need not reproduce the same numbers exactly. Keep the supplied three-GPU training protocol and complete scene assets; missing or invalid `floors.txt` now stops evaluation.
