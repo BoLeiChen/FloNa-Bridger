@@ -29,3 +29,10 @@ def test_validation_selection_unchanged_after_relocation():
     relocated, relocated_audit = select_category_validation(moved, {'building'}, 12, task='image', identity_roots=ROOTS)
     assert [sampling_key(x['key'], ROOTS) for x in relocated] == [x['key'] for x in reference]
     assert relocated_audit == audit
+
+
+def test_sampling_identity_invalidates_old_validation_cache():
+    from datasets.hypothesis_routes import route_signature
+    legacy = route_signature({})
+    assert route_signature(dict(sampling_identity_roots=ROOTS)) != legacy
+    assert route_signature(dict(sampling_identity_roots=None)) == legacy

@@ -11,6 +11,8 @@ from datasets.route_goal_supervision import route_goal_labels
 def route_signature(config):
     keys=('goal_top_k','exploration_candidates','hypothesis_max_snap_m','goal_label_radius_m','route_label_temperature','path_route_points','path_proposal_pool','len_traj_pred','astar_step_m','astar_free_threshold','astar_clearance_m','astar_max_snap_m','astar_exclude_exterior','history_length','traj_pace','validation_buildings_file')
     keys+=('route_supervision','route_policy_version','route_objective','validation_design','data_folder')
+    if config.get('sampling_identity_roots'):
+        keys+=('sampling_identity_roots',)
     split=config.get('validation_buildings_file')
     split_hash=hashlib.sha256(Path(split).read_bytes()).hexdigest() if split and Path(split).is_file() else None
     return hashlib.sha256(json.dumps(dict(version='hypothesis-routes-v4-source-aware',split_sha256=split_hash,parameters={k:config.get(k) for k in keys}),sort_keys=True).encode()).hexdigest()
