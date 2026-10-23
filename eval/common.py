@@ -15,13 +15,16 @@ DEFAULT_GIBSON_DATASET_ROOT = REPO_ROOT / 'iGibson/igibson/data/g_dataset'
 def load_floor_height(scene_name, floor_id, dataset_root=DEFAULT_GIBSON_DATASET_ROOT):
     """Load the absolute world z height for one scene floor."""
     floors_file = os.path.join(dataset_root, scene_name, "floors.txt")
-    if not os.path.exists(floors_file):
-        return 0.0
+    if not os.path.isfile(floors_file):
+        raise FileNotFoundError("Missing floor heights; check scene_assets: " + floors_file)
     with open(floors_file, "r") as f:
         heights = [float(line.strip()) for line in f.readlines() if line.strip()]
-    if floor_id < len(heights):
-        return heights[floor_id]
-    return 0.0
+    if not 0 <= floor_id < len(heights):
+        raise ValueError("Invalid floor index %s for %s" % (floor_id, floors_file))
+    height = heights[floor_id]
+    if not np.isfinite(height):
+        raise ValueError("Non-finite floor height: " + floors_file)
+    return height
 
 def set_seed(seed):
     """Seed NumPy and PyTorch RNGs used during evaluation."""

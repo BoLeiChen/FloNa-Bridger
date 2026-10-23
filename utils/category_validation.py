@@ -4,9 +4,10 @@ import json
 from collections import defaultdict, deque
 from pathlib import Path
 import numpy as np
+from datasets.sampling_identity import sampling_key
 
 
-def select_category_validation(manifest, heldout, per_building=32):
+def select_category_validation(manifest, heldout, per_building=32, identity_roots=None):
     if per_building<1:raise ValueError('Invalid validation trajectory budget')
     groups=defaultdict(lambda:defaultdict(list))
     for item in manifest:
@@ -27,7 +28,7 @@ def select_category_validation(manifest, heldout, per_building=32):
             instances=defaultdict(list)
             for scene,oid,item in values:instances[(scene,oid)].append(item)
             queues[cat]=deque()
-            pools=[deque(sorted(v,key=lambda m:hashlib.sha256(m['key'].encode()).hexdigest())) for _,v in sorted(instances.items())]
+            pools=[deque(sorted(v,key=lambda m:hashlib.sha256(sampling_key(m['key'], identity_roots).encode()).hexdigest())) for _,v in sorted(instances.items())]
             while any(pools):
                 for pool in pools:
                     if pool:queues[cat].append(pool.popleft())

@@ -1,6 +1,7 @@
 """Training-only ImageGoal hypotheses: cached image localization, GT labels isolated."""
 import hashlib,random
 from pathlib import Path
+from datasets.sampling_identity import sampling_root
 from collections import OrderedDict
 import lmdb
 import numpy as np

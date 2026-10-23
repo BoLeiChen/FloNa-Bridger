@@ -1,0 +1,49 @@
+{
+  "audit_date": "2026-10-23",
+  "scope": {
+    "unit_tests": true,
+    "saved_full_evaluation_rescored": true,
+    "fresh_navigation_episodes": 1,
+    "fresh_full_evaluation": false,
+    "full_retraining": false,
+    "fresh_environment_install": false
+  },
+  "tested_runtime": {
+    "python": "3.8.20",
+    "torch": "2.0.1+cu117",
+    "gpu": "NVIDIA GeForce RTX 3090"
+  },
+  "guidance": "V3 route: collision, unknown, boundary, shape, motion and goal costs; not collision-only",
+  "checkpoint_availability": "Reference experiment weights are not hosted by this branch.",
+  "task": "objectgoal",
+  "reference_selector_sha256": "38c22052763bbaf54d81197ddc8248d451918bf3f82d10161f6791af712dcdf8",
+  "reference_controller_sha256": "764427dfe3fb163cf42fc2fd7e2e6fec83fd3253b86784a1641158ce9a5caf18",
+  "reference_episodes": 1710,
+  "historical_metrics": {
+    "SR": 0.31812865497076026,
+    "SPL": 0.18283991902661162
+  },
+  "historical_metrics_validated_for_corrected_floor_heights": false,
+  "historical_floor_height_issue": "Archived evaluation snapshots lacked iGibson asset links. Missing floors.txt silently returned 0.0; the first episode reproduces the archived rollout exactly only when this fallback is restored in a diagnostic copy.",
+  "fresh_first_episode_uses_actual_floor_heights": true,
+  "training_cache_check": {
+    "rebuilt_original_trajectories": 2,
+    "sources": [
+      "without_obj",
+      "with_obj"
+    ],
+    "decoded_fields_equal_to_server_cache": true,
+    "builder": "ObjectGoal release prepare_data.py with the shared cache encoder"
+  },
+  "evaluation_protocol": {
+    "simulator_shortest_path_collision_recovery": true,
+    "success_termination_uses_benchmark_ground_truth": true,
+    "seed": 0,
+    "seeding": "per scene; retain full within-scene episode order"
+  },
+  "historical_spl_coverage": {
+    "scored": 1703,
+    "unavailable": 7
+  },
+  "unit_tests_passed": 134
+}

@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path[:0]=[str(ROOT),str(ROOT/'diffusion_policy')]
 import torch,numpy as np
 from omegaconf import OmegaConf
+from datasets.sampling_identity import sampling_key
 from datasets.pointgoal_bridge_dataset import load_manifest,select_training_manifest
 from datasets.hypothesis_route_dataset import HypothesisRouteLMDB
 from datasets.hypothesis_routes import route_signature
@@ -38,10 +39,10 @@ def main():
     if a.build_validation:
         if a.world_size!=1 or a.rank!=0:raise ValueError('Validation preparation is single-process')
         if v2:
-            manifest,design=select_category_validation(manifest,heldout,int(c.get('validation_trajectories_per_building',32)))
+            manifest,design=select_category_validation(manifest,heldout,int(c.get('validation_trajectories_per_building',32)),identity_roots=c.get('sampling_identity_roots'))
         else:
             selected={}
-            for item in sorted(manifest,key=lambda m:hashlib.sha256(m['key'].encode()).hexdigest()):
+            for item in sorted(manifest,key=lambda m:hashlib.sha256(sampling_key(m['key'],c.get('sampling_identity_roots')).encode()).hexdigest()):
                 building=item['floor_key'].split('::')[-1].rsplit('_',1)[0]
                 if building in heldout and item['sample_count']>=4:selected.setdefault(building,item)
             manifest=list(selected.values())
@@ -69,7 +70,7 @@ def main():
                 first=1 if v2 else 0 # stride8: first evaluated state matches navigation frame8
                 wanted=set(np.linspace(first,item['sample_count']-1,min(count,item['sample_count']-first),dtype=int))
                 if v2 and regime=='tail':
-                    pick=int.from_bytes(hashlib.sha256((item['key']+':validation-tail').encode()).digest()[:8],'big')
+                    pick=int.from_bytes(hashlib.sha256((sampling_key(item['key'],c.get('sampling_identity_roots'))+':validation-tail').encode()).digest()[:8],'big')
                     wanted={first+pick%(item['sample_count']-first)}
                 ds=HypothesisRouteLMDB(dict(c,hypothesis_tail_train_fraction=tail_fraction,validation_window_indices=sorted(wanted)),[item],len(wanted),0)
                 for s in ds:

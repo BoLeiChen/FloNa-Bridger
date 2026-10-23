@@ -140,3 +140,8 @@ cache_data_folder:
 - data/train_with_obj
 eval_data_folder: data/eval_with_obj
 eval_episodes_file: config/objectgoal_eval_1710.json
+
+# Hash namespaces from the reference run; these paths are not opened.
+sampling_identity_roots:
+  without_obj: /mnt/data/floverse_extracted/train_without_obj/HM3D
+  with_obj: /mnt/data/floverse_extracted/train_with_obj
