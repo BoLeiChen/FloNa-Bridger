@@ -7,7 +7,7 @@ PointGoal navigation on Gibson. Run the commands below from the repository root.
 Use Linux with an NVIDIA GPU.
 
 ```bash
-git clone https://github.com/BoLeiChen/FloNa-Bridger.git
+git clone --depth 1 --branch main --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
 cd FloNa-Bridger
 conda env create -f environment.yaml
 conda activate vgcnav
@@ -21,6 +21,7 @@ git clone https://github.com/StanfordVL/iGibson.git iGibson
 git -C iGibson checkout 7d9598278b95ec1039e1f4366c66b45346521e44
 git -C iGibson submodule update --init --recursive
 python -m pip install -e ./iGibson
+python -m igibson.utils.assets_utils --download_assets
 ```
 
 Place Gibson scene assets under `iGibson/igibson/data/g_dataset/`. Evaluation requires working NVIDIA OpenGL/EGL libraries compatible with the installed driver.
@@ -69,6 +70,8 @@ curl -fL --retry 3 -o checkpoints/depth_anything_v2_metric_hypersim_vits.pth \
 ```bash
 python training/train.py --config training/pointgoal_v3.yaml --run_name pointgoal_v3
 ```
+
+This branch trains its navigation checkpoint locally; the HM3D controllers published for the other branches are incompatible with this Gibson model and must not be substituted.
 
 The default configuration trains for 6 epochs with batch size 64. Adjust `gpu_ids` and `batch_size` in the YAML if needed. The final EMA checkpoint is `logs/VGCNav/pointgoal_v3/ema_5.pth`.
 
