@@ -1,6 +1,7 @@
 """Training-only ImageGoal hypotheses: cached image localization, GT labels isolated."""
 import hashlib,random,json
 from pathlib import Path
+from datasets.sampling_identity import sampling_root
 from collections import OrderedDict
 import lmdb
 import numpy as np
@@ -77,7 +78,7 @@ class HypothesisRouteLMDB(MultimodalPathLMDB):
                         for past in range(last+1,start+1):memory.update(poses[past,:2])
                         last=start
                         sample_id='%s::%s::%d'%(scene,record['traj_name'],start)
-                        if self.region_labels and not self.category_labels:sample_id=root+'::'+sample_id
+                        if self.region_labels and not self.category_labels:sample_id=sampling_root(root,self.config.get('sampling_identity_roots'))+'::'+sample_id
                         task=2 if object_task(self.config) else task_for_window(sample_id,self.epoch,self.config)
                         position=poses[start,:2];yaw=np.arctan2(poses[start,3]-poses[start,1],poses[start,2]-poses[start,0])
                         # Expose the reject head to reservoir replenishment during training too.

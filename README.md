@@ -98,3 +98,11 @@ The launcher evaluates all 1,470 fixed tasks with Top-32 hypotheses, the selecte
 ```bash
 python scripts/score_imagegoal.py --output results/imagegoal_v3
 ```
+
+## Reproduction checks
+
+The supplied V3 route guidance includes collision, unknown-space, boundary, shape, motion and goal costs.
+
+Keep `sampling_identity_roots` unchanged when relocating data: these are hash namespaces, not paths to open. Retain the `with_obj`/`without_obj` source directory names. They preserve the reference selector sampling and validation choices across machines.
+
+The archived ImageGoal evaluation silently used zero floor height because its scene-asset link was missing. This release uses the actual floor heights and now fails on missing/invalid `floors.txt`; its corrected evaluation must be rerun in full before reporting new metrics. The historical numbers are not a verified target for this corrected setup. See `config/reproduction_audit.json` for checkpoint hashes and audit scope. The listed pretrained weights are still required separately; full retraining has not been repeated in this audit.

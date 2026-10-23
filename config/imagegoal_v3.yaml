@@ -159,3 +159,8 @@ validation_building_fraction: 0.15
 validation_min_buildings: 40
 eval_data_folder: data/eval_with_obj
 eval_episodes_file: config/imagegoal_eval_1470.json
+
+# Hash namespaces from the reference run; these paths are not opened.
+sampling_identity_roots:
+  without_obj: /mnt/data/floverse_extracted/train_without_obj/HM3D
+  with_obj: /mnt/data/floverse_extracted/train_with_obj
