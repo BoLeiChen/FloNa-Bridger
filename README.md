@@ -1,18 +1,17 @@
-# FloNavBridger — HM3D V3 route
+# FloNavBridger — ImageGoal V3 depth guidance
 
-PointGoal training and evaluation with V3 route depth guidance. Run all commands from the repository root.
+ImageGoal route-selector training and navigation with a frozen PointGoal controller and V3 depth guidance. Run commands from the repository root.
 
 ## Setup
 
-Use Linux and NVIDIA GPUs. The training configuration uses three GPUs.
+Use Linux with NVIDIA GPUs; the supplied training protocol uses three GPUs.
 
 ```bash
-git clone --branch pointgoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
+git clone --branch imagegoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
 cd FloNa-Bridger
 conda env create -f environment.yaml
-conda activate flona-hm3d
+conda activate flona-imagegoal
 python -m pip install -e .
-
 git clone https://github.com/StanfordVL/iGibson.git iGibson
 git -C iGibson checkout 7d9598278b95ec1039e1f4366c66b45346521e44
 git -C iGibson submodule update --init --recursive
@@ -20,9 +19,22 @@ python -m pip install -e ./iGibson
 python -m igibson.utils.assets_utils --download_assets
 ```
 
-Install iGibson's [native dependencies](https://github.com/StanfordVL/iGibson) and ensure NVIDIA OpenGL/EGL works. Download and extract `floverse_scene_dataset.tar` from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k) into `iGibson/igibson/data/`, producing `g_dataset/`.
+Install iGibson's [native dependencies](https://github.com/StanfordVL/iGibson) and ensure NVIDIA OpenGL/EGL works. Extract `floverse_scene_dataset.tar` from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k) into `iGibson/igibson/data/`, producing `g_dataset/`.
 
-Download the visual-backbone weights:
+## Data and pretrained models
+
+Download and extract the HM3D training and ImageGoal evaluation trajectories from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k). Arrange or link them as follows:
+
+```text
+data/
+  train_without_obj/HM3D/<scene_floor>/
+  train_with_obj/<scene_floor>/
+  eval_with_obj/<scene_floor>/
+```
+
+Each scene needs `floorplan.png` and `traj_<id>/`, containing `traj_<id>.txt`, `rgb/*.png` and training `depth/*.png`. Preserve all RGB frames, including the final goal image. This branch uses HM3D, not the Gibson dataset linked on `main`. Edit paths in `config/imagegoal_v3.yaml` when necessary.
+
+Download the visual backbone:
 
 ```bash
 mkdir -p checkpoints
@@ -30,50 +42,57 @@ curl -fL --retry 3 -o checkpoints/depth_anything_v2_vits.pth \
   https://huggingface.co/depth-anything/Depth-Anything-V2-Small/resolve/main/depth_anything_v2_vits.pth
 ```
 
-Depth guidance uses the simulator's metric depth; no separate depth-estimation checkpoint is required.
+Place the experiment's pretrained weights in `checkpoints/`:
 
-## Data preparation
+| File | Required for |
+|---|---|
+| `localizer.ckpt` | Frozen CF2Loc goal localization |
+| `disco.pt` | Frozen goal-hypothesis ranking |
+| `controller_training.pth` | Frozen controller used to train the selector |
+| `controller_navigation.pth` | Controller used during V3 navigation |
 
-Download the training and PointGoal evaluation data from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k), extract the per-scene archives, and arrange or link the directories as follows. This branch uses HM3D data; the Gibson dataset used by `main` is not compatible.
+These experiment weights are **not included or hosted by this code branch**. Obtain them from the experiment owner before preparing hypotheses; `config/pretrained_weights.json` identifies the exact files by SHA-256. The localization and ranking models remain frozen in the training workflow below. Simulator depth supplies guidance, so no additional depth-estimation model is needed.
 
-```text
-data/
-  train_without_obj/HM3D/<scene_floor>/
-  train_with_obj/<scene_floor>/
-  eval_without_obj/HM3D/<scene_floor>/
-```
-
-Each scene contains `floorplan.png` and `traj_<id>/`. Training trajectories require `traj_<id>.txt`, `rgb/*.png` and `depth/*.png`; keep `object.json` where present. If using different locations, edit `data_folder`, `eval_data_folder`, `lmdb_path`, `map_cache`, `prior_cache` and `scene_assets` in `config/pointgoal_v3.yaml`.
-
-Build the training cache and calibrated maps:
+Build the training cache, maps, goal hypotheses and held-out validation samples:
 
 ```bash
-python scripts/prepare_data.py --config config/pointgoal_v3.yaml
-python utils/prepare_pointgoal_bridge.py --config config/pointgoal_v3.yaml
+python scripts/prepare_data.py --config config/imagegoal_v3.yaml
+python utils/prepare_pointgoal_bridge.py --config config/imagegoal_v3.yaml
+CUDA_VISIBLE_DEVICES=0 python utils/prepare_topk_routes.py --config config/imagegoal_v3.yaml --device cuda:0
+CUDA_VISIBLE_DEVICES=0 python utils/prepare_topk_routes.py --config config/imagegoal_v3.yaml --device cuda:0 --build-validation
 ```
 
-Preparation uses the included training selection and checks the fixed evaluation references. Use a fresh LMDB output directory and leave the cache directories writable. First training also builds A* path caches. Data and scene assets are not included in this code repository.
+Use fresh LMDB and validation-cache paths. The included selection fixes training trajectories and held-out buildings. Caches are tied to data and model paths; regenerate them after relocation. A cache prepared on the `pointgoal-hm3d-v3` branch can be reused with the same training roots.
 
 ## Training
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1,2 OMP_NUM_THREADS=2 torchrun --standalone --nproc_per_node=3 \
-  utils/train_pointgoal_bridge.py --config config/pointgoal_v3.yaml --run-name pointgoal_v3
+  utils/train_topk_routes.py --config config/imagegoal_v3.yaml --run-name imagegoal_v3
 ```
 
-Defaults: 5 epochs, batch size 16 per GPU and Adam learning rate `1e-4`. The final checkpoint is `runs/pointgoal_v3/planner_epoch_5_final.pth`. Changing the GPU count changes the training schedule; use three processes for the supplied protocol.
+Defaults: 5 epochs, batch size 24 per GPU, AdamW learning rate `1e-4`, weight decay `0.01`, and cosine decay to `1e-6`. Navigation uses `runs/imagegoal_v3/planner_best_route_validation.pth`, selected on the held-out training buildings.
+
+To retrain the two PointGoal controllers, use the same prepared training cache and visual backbone:
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1,2 OMP_NUM_THREADS=2 torchrun --standalone --nproc_per_node=3 utils/train_pointgoal_bridge.py --config config/controller_training.yaml --run-name controller_training
+CUDA_VISIBLE_DEVICES=0,1,2 OMP_NUM_THREADS=2 torchrun --standalone --nproc_per_node=3 utils/train_pointgoal_bridge.py --config config/pointgoal_v3.yaml --run-name controller_navigation
+cp runs/controller_training/planner_epoch_5_final.pth checkpoints/controller_training.pth
+cp runs/controller_navigation/planner_epoch_5_final.pth checkpoints/controller_navigation.pth
+```
+
+Run controller training before selector training if using newly trained controllers. Keep the two controller checkpoints separate.
 
 ## Evaluation
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=2 bash scripts/evaluate.sh \
-  runs/pointgoal_v3/planner_epoch_5_final.pth results/pointgoal_v3
+CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=2 bash scripts/evaluate_imagegoal.sh \
+  runs/imagegoal_v3/planner_best_route_validation.pth results/imagegoal_v3
 ```
 
-The launcher enables `config/depth_v3_route.yaml`, evaluates the fixed 4,084 episodes and writes `results/pointgoal_v3/summary.json`. Use a new run/output directory each time. For another evaluation data location, set `EVAL_DATA_ROOT`. Configure `__EGL_VENDOR_LIBRARY_FILENAMES` if your driver requires a custom EGL path.
-
-To recompute metrics from saved rollouts:
+The launcher evaluates all 1,470 fixed tasks with Top-32 hypotheses, the selected route-switching settings and V3 depth guidance. It writes `summary.json` with SR, SPL and coverage counts. Use a fresh output directory; set `EVAL_DATA_ROOT` or `NAV_CONTROLLER` to override the evaluation data or navigation checkpoint. Configure `__EGL_VENDOR_LIBRARY_FILENAMES` if needed by your driver.
 
 ```bash
-python scripts/score.py --output results/pointgoal_v3 --scenes-dir data/eval_without_obj/HM3D
+python scripts/score_imagegoal.py --output results/imagegoal_v3
 ```

@@ -1,4 +1,4 @@
-name: flona-hm3d
+name: flona-imagegoal
 channels: [pytorch, nvidia, conda-forge]
 dependencies:
   - python=3.8.20
@@ -23,4 +23,7 @@ dependencies:
       - zstandard==0.23.0
       - gym==0.26.2
       - pybullet-svl==3.1.6.4
+      - pytorch-lightning==2.0.0
+      - torchmetrics==1.5.2
+      - opencv-python==4.10.0.84
       - pytest

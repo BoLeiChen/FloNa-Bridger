@@ -30,7 +30,7 @@ def prepare(config, selection, max_trajectories=None, map_size_gb=600):
         folder = roots[group] / scene / trajectory
         if not (folder / (trajectory + '.txt')).is_file():
             raise FileNotFoundError(folder / (trajectory + '.txt'))
-    episodes = json.loads(Path('config/evaluation_episodes.json').read_text())
+    episodes = json.loads(Path(config.get('eval_episodes_file', 'config/evaluation_episodes.json')).read_text())
     for scene, trajectory in episodes:
         path = Path(config.get('eval_data_folder', 'data/eval_without_obj/HM3D')) / scene / trajectory / (trajectory + '.txt')
         if not path.is_file():

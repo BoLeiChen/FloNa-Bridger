@@ -143,7 +143,7 @@ class PointBridgePlanner(nn.Module):
         self.obs_encoder.eval()
         return self
 
-    def conditions(self, batch):
+    def encode_rgb(self, batch):
         rgb = torch.cat([batch['rgb'], batch['current_rgb'][:, None]], 1)
         if rgb.ndim != 5 or rgb.shape[1:3] != (4, 3):
             raise ValueError('Expected exactly four chronological RGB frames [B,4,3,H,W]')
@@ -161,6 +161,10 @@ class PointBridgePlanner(nn.Module):
         deep = self.compress_deep_obs_enc(torch.cat([cls, patches.mean(1)], -1)).reshape(b, t, -1)
         shallow = torch.stack([features[i][0] for i in self.shallow_layers]).mean(0)
         shallow = shallow.reshape(b, t, shallow.shape[1], 384)[:, -1]
+        return b, t, normalized, deep, shallow
+
+    def conditions(self, batch, rgb_features=None):
+        b, t, normalized, deep, shallow = self.encode_rgb(batch) if rgb_features is None else rgb_features
         clean = path_features(batch['prior'], batch['prior_valid'])
         # Use VGCNav's RGB-only gate fallback; no measured or predicted depth map.
         aux = self.local_condition_gate(shallow, clean)

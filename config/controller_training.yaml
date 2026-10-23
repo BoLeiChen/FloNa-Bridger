@@ -1,0 +1,73 @@
+point_goal_train_prob: 1.0
+img_goal_train_prob: 0.0
+object_goal_train_prob: 0.0
+data_backend: lmdb
+data_folder:
+- data/train_without_obj/HM3D
+- data/train_with_obj
+eval_data_folder: data/eval_without_obj/HM3D
+lmdb_path: data/cache/lmdb
+scene_assets: iGibson/igibson/data/g_dataset
+map_cache: data/cache/maps256
+prior_cache: data/cache/astar_priors
+run_dir: runs
+astar_free_threshold: 0.96
+astar_clearance_m: 0.1
+astar_exclude_exterior: false
+astar_max_snap_m: 0.5
+astar_step_m: 0.1
+len_traj_pred: 16
+history_length: 3
+traj_pace: 8
+train_scene_dataset: hm3d
+lmdb_source_traj_pace: 4
+lmdb_source_len_traj_pred: 16
+condition_dim: 256
+mha_num_attention_layers: 4
+down_dims:
+- 64
+- 128
+- 256
+bridge:
+  action_step_m: 0.1
+  sigma_data: 0.5
+  sigma_min: 0.002
+  sigma_max: 10.0
+  rho: 7.0
+  steps: 10
+  guidance: 1.0
+  churn: 0.33
+global_context_token_mode: floorplan
+global_coordinate_mode: world
+global_coordinate_step_m: 0.1
+obs_image_size: 98
+dinov2_checkpoint: checkpoints/depth_anything_v2_vits.pth
+shallow_feature_layers:
+- 2
+- 5
+deep_feature_layer: 11
+shallow_residual_alpha_max: 0.25
+curvature_gate_horizon: 20
+curvature_stride: 3
+curvature_smoothing_window: 3
+local_gate_hidden_dim: 128
+local_gate_coordinate_scale: 3.2
+mha_num_attention_heads: 4
+mha_dropout: 0.1
+gate_loss_weight: 0.01
+batch_size: 16
+num_workers: 6
+lmdb_num_workers: 1
+prefetch_factor: 2
+gradient_accumulation_steps: 1
+mixed_precision: 'no'
+learning_rate: 0.0001
+optimizer: adam
+epochs: 5
+eval_per_batches: 100
+save_pre_batches: 500
+save_epoch_checkpoints: true
+shuffle_seed: 0
+seed: 0
+log_every: 10
+eval_max_trajs_per_scene: 30
