@@ -23,7 +23,7 @@ Install iGibson's [native dependencies](https://github.com/StanfordVL/iGibson) a
 
 ## Data and pretrained models
 
-Download and extract the HM3D training and ObjectGoal evaluation trajectories from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k). Arrange or link the directories as follows:
+Our dataset is a fixed HM3D subset reorganized from [FloVerse-1.6k (original data download)](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k). Download `train_without_obj/HM3D` and `train_with_obj`, plus `eval_with_obj`. Extract the per-scene archives, preserve scene/trajectory names and all frames, and place or symlink the extracted scene folders under the following paths.
 
 ```text
 data/
@@ -32,7 +32,7 @@ data/
   eval_with_obj/<scene_floor>/
 ```
 
-Each scene needs `floorplan.png` and `traj_<id>/`, containing `traj_<id>.txt`, `rgb/*.png` and training `depth/*.png`. ObjectGoal trajectories also require `object/object.json`. The cache includes both training sources for controller training; the ObjectGoal selector uses only `train_with_obj`. Edit paths in `config/objectgoal_v3.yaml` if needed. This branch uses HM3D rather than the Gibson data linked on `main`.
+Each scene needs `floorplan.png` and `traj_<id>/`, containing `traj_<id>.txt`, `rgb/*.png` and training `depth/*.png`. ObjectGoal trajectories also require `object/object.json`. The cache includes both training sources for controller training; the ObjectGoal selector uses only `train_with_obj`. Edit paths in `config/objectgoal_v3.yaml` if needed.
 
 Download the visual backbones:
 
@@ -63,7 +63,9 @@ CUDA_VISIBLE_DEVICES=0 python utils/prepare_topk_routes.py --config config/objec
 CUDA_VISIBLE_DEVICES=0 python utils/prepare_topk_routes.py --config config/objectgoal_v3.yaml --device cuda:0 --build-validation
 ```
 
-Use fresh LMDB and validation-cache paths. The included selection fixes training trajectories and held-out buildings. Caches remain writable and should be rebuilt after changing their inputs or paths.
+`config/training_selection.json.gz` selects 118,143 `without_obj` and 57,750 `with_obj` trajectories for the shared controller cache. `prepare_data.py` checks their lengths and builds a stride-4 LMDB cache; training uses stride-8 windows with 16 waypoints, so keep all raw frames. The ObjectGoal selector uses only `with_obj`: holding out the 40 training buildings in `config/object_validation_buildings.json` leaves 48,000 training trajectories. `--build-validation` creates the selector validation samples; this holdout does not apply to the PointGoal controllers. Evaluation uses only the 1,710 upstream evaluation trajectories in `config/objectgoal_eval_1710.json`, with target categories and positions from the object annotations.
+
+Use fresh LMDB and validation-cache paths. Keep caches writable and rebuild them after changing their inputs or paths.
 
 ## Training
 
