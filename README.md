@@ -43,7 +43,7 @@ curl -fL --retry 3 -o checkpoints/depth_anything_v2_vits.pth \
 python -c "import clip; clip.load('ViT-B/16', device='cpu', download_root='checkpoints')"
 ```
 
-Place the experiment's pretrained weights in `checkpoints/`:
+The supplied reference weights are restored into `checkpoints/`:
 
 | File | Required for |
 |---|---|
@@ -51,14 +51,15 @@ Place the experiment's pretrained weights in `checkpoints/`:
 | `object_disco.pt` | Frozen object-hypothesis ranking |
 | `controller_training.pth` | Frozen controller used to train the selector |
 | `controller_navigation.pth` | Controller used during V3 navigation |
+| `selector.pth` | Reference objectgoal path selector for evaluation |
 
-Localization and ranking weights are included as checked binary parts. Restore them with:
+Localization, ranking, controller and selector weights are included as checked binary parts. Restore all of them with:
 
 ```bash
 python scripts/prepare_weights.py
 ```
 
-Controller weights are not included: train them using the commands below or supply the reference checkpoints identified in `config/pretrained_weights.json`. To reconstruct localization training data and train the localization/ranking models, follow [Localization training](docs/LOCALIZATION.md). The navigation workflow below freezes these models; simulator depth supplies trajectory guidance.
+`config/pretrained_weights.json` records the reference SHA-256 hashes. The restore script verifies every part and refuses to overwrite different existing weights. For evaluation with the supplied selector, complete setup, download the visual backbone(s), restore weights and prepare only `data/eval_with_obj` plus the scene assets; then go directly to **Evaluation**. Training caches are unnecessary for this path. To train localization/ranking models, follow [Localization training](docs/LOCALIZATION.md).
 
 Prepare the training cache, maps, category hypotheses and validation samples:
 
@@ -98,8 +99,10 @@ Keep the controller used for selector training separate from the navigation cont
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=2 bash scripts/evaluate_objectgoal.sh \
-  runs/objectgoal_v3/planner_best_route_validation.pth results/objectgoal_v3
+  checkpoints/selector.pth results/objectgoal_v3
 ```
+
+To evaluate your retrained selector, replace `checkpoints/selector.pth` with `runs/objectgoal_v3/planner_best_route_validation.pth`.
 
 The launcher evaluates the fixed 1,710 tasks with 64 goal candidates, 4 exploration candidates and V3 depth guidance. Success uses the same-category object-center region with a 1 m threshold. It writes `summary.json` with SR, SPL and coverage counts. Use a fresh output directory; set `EVAL_DATA_ROOT` or `NAV_CONTROLLER` to override the evaluation data or navigation checkpoint. Configure `__EGL_VENDOR_LIBRARY_FILENAMES` if required by your driver.
 
@@ -113,4 +116,4 @@ The supplied V3 route guidance includes collision, unknown-space, boundary, shap
 
 Keep `sampling_identity_roots` unchanged when relocating data: these are hash namespaces, not paths to open. Retain the `with_obj`/`without_obj` source directory names. They preserve the reference selector sampling and validation choices across machines. Rebuild validation caches created before this fix.
 
-The archived ObjectGoal evaluation silently used zero floor height because its scene-asset link was missing. This release uses the actual floor heights and now fails on missing/invalid `floors.txt`; its corrected evaluation must be rerun in full before reporting new metrics. The historical numbers are not a verified target for this corrected setup. See `config/reproduction_audit.json` for checkpoint hashes and audit scope. Controller weights are required separately or must be trained; full retraining has not been repeated in this audit.
+The archived ObjectGoal evaluation silently used zero floor height because its scene-asset link was missing. This release uses the actual floor heights and now fails on missing/invalid `floors.txt`; its corrected evaluation must be rerun in full before reporting new metrics. The historical numbers are not a verified target for this corrected setup. See `config/reproduction_audit.json` for checkpoint hashes and audit scope. The supplied weights are the reference experiment files; full retraining has not been repeated in this audit.

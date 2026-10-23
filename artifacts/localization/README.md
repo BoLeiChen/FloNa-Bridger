@@ -1,6 +1,6 @@
 # Reference localization weights
 
-These are the reference experiment checkpoints, stored in parts no larger than 40 MiB. Run `python scripts/prepare_weights.py` from the repository root to restore and verify them. Public visual backbones and PointGoal controllers are separate.
+These are the reference experiment checkpoints, stored in parts no larger than 40 MiB. Run `python scripts/prepare_weights.py` from the repository root to restore and verify them. PointGoal controllers and the reference path selector are in `../navigation/` and restored by the same command. Public visual backbones are downloaded separately.
 
 | Restored file | Bytes | SHA-256 |
 |---|---:|---|

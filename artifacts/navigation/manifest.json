@@ -1,0 +1,80 @@
+{
+  "controller_training.pth": {
+    "bytes": 142667445,
+    "sha256": "151047a8393506f71834385823c349ff3a573f2e7a996ff756584f9712ce3e31",
+    "parts": [
+      {
+        "path": "controller_training.pth.part-00",
+        "bytes": 41943040,
+        "sha256": "b395370cb9adba906559b0284117eb28a412ee741f3c7f9170c5d0c55ede4dcd"
+      },
+      {
+        "path": "controller_training.pth.part-01",
+        "bytes": 41943040,
+        "sha256": "dd461d3c746bdd901edcac0839e50783b89d2322f4c47c3c043b2bcd331e3c45"
+      },
+      {
+        "path": "controller_training.pth.part-02",
+        "bytes": 41943040,
+        "sha256": "8e09f7cd4cedc3b6c72e1aeac2f2e70926696f065150877e91ddeb43ce886ecf"
+      },
+      {
+        "path": "controller_training.pth.part-03",
+        "bytes": 16838325,
+        "sha256": "fe9906f14b9ddb5ecdbc771980f496231b6af766e79282849a4192ec9023ea4a"
+      }
+    ]
+  },
+  "controller_navigation.pth": {
+    "bytes": 142667445,
+    "sha256": "764427dfe3fb163cf42fc2fd7e2e6fec83fd3253b86784a1641158ce9a5caf18",
+    "parts": [
+      {
+        "path": "controller_navigation.pth.part-00",
+        "bytes": 41943040,
+        "sha256": "ecc3d7ec91993958fffe67ece10a9ee3c5b3277522d1c444440188d8cce187ec"
+      },
+      {
+        "path": "controller_navigation.pth.part-01",
+        "bytes": 41943040,
+        "sha256": "6d21c6897e7951e683b1254deeab438aef79dea749a6e17efd68b87c84684986"
+      },
+      {
+        "path": "controller_navigation.pth.part-02",
+        "bytes": 41943040,
+        "sha256": "6ddd7a1b0ee6b9ad239de6733ba8075f8f270b87206da006a0a2c5fd66116730"
+      },
+      {
+        "path": "controller_navigation.pth.part-03",
+        "bytes": 16838325,
+        "sha256": "9b557b60135fae945406272350106de79cb8940fa8fdef597099da6f6abd5077"
+      }
+    ]
+  },
+  "selector.pth": {
+    "bytes": 148277525,
+    "sha256": "38c22052763bbaf54d81197ddc8248d451918bf3f82d10161f6791af712dcdf8",
+    "parts": [
+      {
+        "path": "selector.pth.part-00",
+        "bytes": 41943040,
+        "sha256": "7c23fbdb47f5569e30e1430a67aa04ac7e19f83f8ae061e15518b430a31fca41"
+      },
+      {
+        "path": "selector.pth.part-01",
+        "bytes": 41943040,
+        "sha256": "0e3a1d1113ac8da06616f7e9b300a27725eb3530e624b80c71374af1f2605483"
+      },
+      {
+        "path": "selector.pth.part-02",
+        "bytes": 41943040,
+        "sha256": "bf601813bb0d89f4d667008e7f6fb1720eefdd4cc6e4a9de6fa737bb1dd804ea"
+      },
+      {
+        "path": "selector.pth.part-03",
+        "bytes": 22448405,
+        "sha256": "1c4874ebd7b3f6c998976b1013f95f6c3626f2d7c2b61c60d49449a341794a27"
+      }
+    ]
+  }
+}

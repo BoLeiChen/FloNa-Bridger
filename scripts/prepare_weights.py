@@ -1,4 +1,4 @@
-"""Assemble the original localization checkpoints and verify SHA-256."""
+"""Assemble the original localization and navigation checkpoints and verify SHA-256."""
 import argparse,hashlib,json,os
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -27,4 +27,6 @@ def assemble(source,output):
         finally:
             if tmp.exists():tmp.unlink()
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',default='checkpoints');p.add_argument('--source',default=str(ROOT/'artifacts/localization'));a=p.parse_args();assemble(a.source,a.output)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',default='checkpoints');p.add_argument('--source',help='Restore one artifact directory instead of both default groups');a=p.parse_args()
+    sources=[Path(a.source)] if a.source else [ROOT/'artifacts/localization',ROOT/'artifacts/navigation']
+    for source in sources:assemble(source,a.output)
