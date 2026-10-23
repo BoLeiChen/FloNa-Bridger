@@ -1,0 +1,39 @@
+name: Finalize complete reference weight release
+on:
+  push:
+    branches: [imagegoal-hm3d-v3]
+    paths: [.github/workflows/finalize-reference-weights.yml]
+permissions:
+  contents: write
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Remove unused refiner asset and update release metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release download hm3d-reference-weights-v1 --pattern manifest.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('manifest.json');d=json.loads(p.read_text());d.pop('refiner_init.ckpt',None)
+          p.write_text(json.dumps(d,indent=2)+'\n')
+          Path('SHA256SUMS').write_text(''.join(v['sha256']+'  '+k+'\n' for k,v in sorted(d.items())))
+          PY
+          gh release delete-asset hm3d-reference-weights-v1 refiner_init.ckpt --yes
+          gh release upload hm3d-reference-weights-v1 manifest.json SHA256SUMS --clobber
+          cat > notes.md <<'EOF'
+          Complete original HM3D reference checkpoint files for ImageGoal and ObjectGoal. No split-file assembly is needed. SHA256SUMS and manifest.json record original sizes and hashes.
+
+          Shared: controller_training.pth and controller_navigation.pth.
+          ImageGoal: localizer.ckpt, disco.pt, imagegoal_selector.pth.
+          ObjectGoal: object_localizer.pt, object_disco.pt, objectgoal_selector.pth.
+
+          Current ImageGoal ranker training uses random initialization, with no refiner checkpoint or training stage. The downloadable disco.pt is the historical reference model: its map encoder was initialized from a refiner during the original experiment, but all required inference parameters are already contained in disco.pt. The newly documented random-initialization training protocol has not undergone full training or navigation evaluation and is not claimed to reproduce historical performance. The original frozen public visual backbones remain separate downloads.
+
+          Follow the README on the imagegoal-hm3d-v3 or objectgoal-hm3d-v3 branch for preparation, training and evaluation.
+          EOF
+          gh release edit hm3d-reference-weights-v1 --notes-file notes.md
