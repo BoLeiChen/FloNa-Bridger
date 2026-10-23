@@ -26,5 +26,17 @@
     "data_reconstruction": "All 1238511 pose rows byte-identical to reference; sampled calibrated maps pixel-identical; four-frame LMDB built",
     "training_smoke": "Diffusion 10 optimizer steps; refiner 2 steps; ranker train/validation candidate mining and 3 optimization steps with validation/checkpoint export",
     "full_training_repeated": false
+  },
+  "current_ranker_initialization": "random; learns BatchNorm statistics; differs from historical refiner-initialized reference checkpoint",
+  "random_initialization_validation": {
+    "gpus": 2,
+    "candidate_train_frames": 8,
+    "candidate_validation_frames": 4,
+    "optimizer_steps": 2,
+    "sync_batchnorm": true,
+    "refiner_checkpoint_loaded": false,
+    "checkpoint_export_passed": true,
+    "full_training": false,
+    "full_navigation_evaluation": false
   }
 }

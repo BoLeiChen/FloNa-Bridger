@@ -94,11 +94,12 @@ class DisCoMatcher(nn.Module):
 
     def train(self, mode=True):
         super().train(mode)
-        # Keep pretrained BN statistics stable across query-local candidate groups.
-        # Affine weights and all convolution/context weights remain trainable.
-        for module in self.local_map_encoder.modules():
-            if isinstance(module, nn.modules.batchnorm._BatchNorm):
-                module.eval()
+        # Legacy checkpoints used pretrained map features with frozen BN statistics.
+        # A newly initialized encoder learns its running statistics during training.
+        if self.config.get('map_encoder_initialization', 'refiner') == 'refiner':
+            for module in self.local_map_encoder.modules():
+                if isinstance(module, nn.modules.batchnorm._BatchNorm):
+                    module.eval()
         return self
 
     def forward(self, image_tokens, maps):

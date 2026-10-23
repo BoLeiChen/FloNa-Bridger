@@ -6,9 +6,6 @@ navigation_test_roots:
 - data/localization/image/navigation_exclusions/without_obj
 diffusion_checkpoint: checkpoints/localizer.ckpt
 diffusion_sha256: 159b032fd83d0b41e7dac9fd4bd986d347e8014ba461d52a05d144b0f91c2155
-refiner_checkpoint: checkpoints/refiner_init.ckpt
-refiner_sha256: f64a2b3ef664529437054f8e65f0c5bb715a26f0c09aa846654f296442518314
-refiner_config: config/localization/image_refiner_finetune.yaml
 train_frames: 120000
 val_frames: 6000
 terminal_fraction: 0.25
@@ -37,3 +34,4 @@ fusion_weights:
 - 0.9
 - 1.0
 dinov2_checkpoint: checkpoints/depth_anything_v2_vits.pth
+map_encoder_initialization: random

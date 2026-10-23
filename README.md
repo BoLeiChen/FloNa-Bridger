@@ -7,7 +7,7 @@ ImageGoal route-selector training and navigation with a frozen PointGoal control
 Use Linux with NVIDIA GPUs; the supplied training protocol uses three GPUs.
 
 ```bash
-git clone --branch imagegoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
+git clone --depth 1 --branch imagegoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
 cd FloNa-Bridger
 conda env create -f environment.yaml
 conda activate flona-imagegoal
@@ -42,23 +42,24 @@ curl -fL --retry 3 -o checkpoints/depth_anything_v2_vits.pth \
   https://huggingface.co/depth-anything/Depth-Anything-V2-Small/resolve/main/depth_anything_v2_vits.pth
 ```
 
-The supplied reference weights are restored into `checkpoints/`:
+Download the reference weights as **complete files** from [GitHub Releases](https://github.com/BoLeiChen/FloNa-Bridger/releases/tag/hm3d-reference-weights-v1). The command below saves them to `checkpoints/`:
 
 | File | Required for |
 |---|---|
-| `localizer.ckpt` | Frozen CF2Loc goal localization |
-| `disco.pt` | Frozen goal-hypothesis ranking |
-| `controller_training.pth` | Frozen controller used to train the selector |
-| `controller_navigation.pth` | Controller used during V3 navigation |
-| `selector.pth` | Reference imagegoal path selector for evaluation |
+| [`localizer.ckpt`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/localizer.ckpt) | Frozen CF2Loc goal localization |
+| [`disco.pt`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/disco.pt) | Frozen goal-hypothesis ranking |
+| [`controller_training.pth`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/controller_training.pth) | Frozen controller used to train the selector |
+| [`controller_navigation.pth`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/controller_navigation.pth) | Controller used during V3 navigation |
+| [`selector.pth`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/imagegoal_selector.pth) | Reference imagegoal path selector for evaluation |
 
-Localization, ranking, controller and selector weights are included as checked binary parts. Restore all of them with:
+Download localization, ranking, controller and selector weights with SHA-256 verification:
 
 ```bash
-python scripts/prepare_weights.py
+python scripts/download_weights.py
 ```
 
-`config/pretrained_weights.json` records the reference SHA-256 hashes. The restore script verifies every part and refuses to overwrite different existing weights. For evaluation with the supplied selector, complete setup, download the visual backbone(s), restore weights and prepare only `data/eval_with_obj` plus the scene assets; then go directly to **Evaluation**. Training caches are unnecessary for this path. To train localization/ranking models, follow [Localization training](docs/LOCALIZATION.md).
+`config/pretrained_weights.json` records the reference SHA-256 hashes. `config/weights.json` lists complete-file URLs, sizes and hashes. The downloader refuses to overwrite different existing weights. The task-specific selector asset is saved as `checkpoints/selector.pth`. For evaluation with the supplied selector, complete setup, download the visual backbone(s), download weights and prepare only `data/eval_with_obj` plus the scene assets; then go directly to **Evaluation**. Training caches are unnecessary for this path. To train localization/ranking models, follow [Localization training](docs/LOCALIZATION.md). The ImageGoal ranker starts from random initialization with no refiner stage or checkpoint; the original public visual backbone remains frozen.
+
 
 Build the training cache, maps, goal hypotheses and held-out validation samples:
 

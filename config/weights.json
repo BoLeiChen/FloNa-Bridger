@@ -1,0 +1,30 @@
+{
+  "release": "https://github.com/BoLeiChen/FloNa-Bridger/releases/tag/hm3d-reference-weights-v1",
+  "files": {
+    "localizer.ckpt": {
+      "url": "https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/localizer.ckpt",
+      "bytes": 110598104,
+      "sha256": "159b032fd83d0b41e7dac9fd4bd986d347e8014ba461d52a05d144b0f91c2155"
+    },
+    "disco.pt": {
+      "url": "https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/disco.pt",
+      "bytes": 5678786,
+      "sha256": "9a931d509398f9f22ae768097f45aa1f189264db72b44c9f91b91391dd71090e"
+    },
+    "controller_training.pth": {
+      "url": "https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/controller_training.pth",
+      "bytes": 142667445,
+      "sha256": "151047a8393506f71834385823c349ff3a573f2e7a996ff756584f9712ce3e31"
+    },
+    "controller_navigation.pth": {
+      "url": "https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/controller_navigation.pth",
+      "bytes": 142667445,
+      "sha256": "764427dfe3fb163cf42fc2fd7e2e6fec83fd3253b86784a1641158ce9a5caf18"
+    },
+    "selector.pth": {
+      "url": "https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/imagegoal_selector.pth",
+      "bytes": 147484789,
+      "sha256": "c204f96d79cb4899d8a16080f32cd7ff0e46657dc848e31bd1271456ad2caa6b"
+    }
+  }
+}

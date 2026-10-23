@@ -73,6 +73,7 @@ def save_checkpoint(path,state):
 def main():
     p=argparse.ArgumentParser();p.add_argument('--config',required=True);p.add_argument('--resume',action='store_true');p.add_argument('--smoke',action='store_true')
     args=p.parse_args();c=yaml.safe_load(Path(args.config).read_text())
+    if c.get('map_encoder_initialization')!='random':raise ValueError('This training entry point requires random map-encoder initialization')
     world=int(os.environ.get('WORLD_SIZE',1));rank=int(os.environ.get('RANK',0))
     device=torch.device('cuda',int(os.environ.get('LOCAL_RANK',0)));torch.cuda.set_device(device);torch.set_num_threads(4)
     if world>1:dist.init_process_group('nccl')
@@ -86,8 +87,7 @@ def main():
     train_loader=DataLoader(train,batch_size=c['batch_size'],sampler=sampler,drop_last=True,num_workers=c['workers'],pin_memory=True,persistent_workers=c['workers']>0)
     val_loader=DataLoader(torch.utils.data.Subset(val,val_ids),batch_size=c['val_batch_size'],shuffle=False,num_workers=c['workers'],pin_memory=True)
     model=DisCoMatcher(c).to(device)
-    if digest(c['refiner_checkpoint'])!=c['refiner_sha256']:raise ValueError('Refiner SHA mismatch')
-    model.initialize_map_from_refiner(torch.load(c['refiner_checkpoint'],map_location='cpu'))
+    if world>1:model=torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
     if world>1:model=DDP(model,device_ids=[device.index],broadcast_buffers=False)
     optimizer=torch.optim.AdamW(model.parameters(),lr=float(c['lr']),weight_decay=float(c['weight_decay']))
     scheduler=torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,c['epochs'],eta_min=float(c['min_lr']))
@@ -131,7 +131,7 @@ def main():
                 save_checkpoint(run/'best.pt',state)
                 atomic_json(run/'best.json',{'checkpoint':str(run/'best.pt'),'checkpoint_sha256':digest(run/'best.pt'),
                     'selection_metric':'val_recall_1m_then_lower_mean_xy_m','navigation_test_used':False,
-                    'diffusion_sha256':c['diffusion_sha256'],'refiner_sha256':c['refiner_sha256'],**best_record})
+                    'diffusion_sha256':c['diffusion_sha256'],'map_encoder_initialization':c['map_encoder_initialization'],**best_record})
             save_checkpoint(run/'last.pt',{**state,'optimizer':optimizer.state_dict(),'scheduler':scheduler.state_dict(),
                                            'best_key':best_key,'best_record':best_record,'stale':stale})
         if world>1:dist.barrier()

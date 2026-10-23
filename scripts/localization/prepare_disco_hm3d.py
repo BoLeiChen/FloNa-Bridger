@@ -107,7 +107,6 @@ def manifest(c):
     meta=json.loads(Path(c['index']).read_text())
     audit=assert_disjoint(meta,c['navigation_test_roots'])
     if digest(c['diffusion_checkpoint'])!=c['diffusion_sha256']: raise ValueError('Diffusion SHA mismatch')
-    if digest(c['refiner_checkpoint'])!=c['refiner_sha256']: raise ValueError('Refiner SHA mismatch')
     info={'config':c,'index_sha256':digest(c['index']),'leakage_audit':audit,'splits':{}}
     for split in ('train','val'):
         ds=open_source(c,split)
