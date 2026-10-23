@@ -21,7 +21,9 @@ def test_extracted_cache_preserves_rgb_pose_and_manifest(tmp_path,monkeypatch):
     for t in range(24):
         Image.new('RGB',(96,96),(t,t,t)).save(traj/'rgb'/('rgb_%d.png'%t))
         Image.fromarray(np.full((96,96),t+1,dtype=np.uint16)).save(traj/'depth'/('depth_%d.png'%t))
-    cfg=dict(data_folder=[str(root),str(root)],lmdb_path=str(tmp_path/'cache'),eval_data_folder=str(root))
+    cfg=dict(data_folder=[str(root),str(root)],lmdb_path=str(tmp_path/'cache'),eval_data_folder=str(tmp_path/'evaluation_not_downloaded'))
+    with pytest.raises(FileNotFoundError):
+        prepare(cfg,dict(records=[[0,'00001-room_0','traj_0',3]]),map_size_gb=.1,check_evaluation=True)
     report=prepare(cfg,dict(records=[[0,'00001-room_0','traj_0',3]]),map_size_gb=.1)
     assert report['trajectories']==1 and report['training_windows']==2
     env=lmdb.open(cfg['lmdb_path'],readonly=True,lock=False)

@@ -1,0 +1,10 @@
+{
+  "release": "https://github.com/BoLeiChen/FloNa-Bridger/releases/tag/hm3d-reference-weights-v1",
+  "files": {
+    "controller_navigation.pth": {
+      "url": "https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/controller_navigation.pth",
+      "bytes": 142667445,
+      "sha256": "764427dfe3fb163cf42fc2fd7e2e6fec83fd3253b86784a1641158ce9a5caf18"
+    }
+  }
+}

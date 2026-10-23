@@ -7,7 +7,7 @@ PointGoal training and evaluation with V3 route depth guidance. Run all commands
 Use Linux and NVIDIA GPUs. The training configuration uses three GPUs.
 
 ```bash
-git clone --branch pointgoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
+git clone --depth 1 --branch pointgoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
 cd FloNa-Bridger
 conda env create -f environment.yaml
 conda activate flona-hm3d
@@ -54,6 +54,8 @@ python utils/prepare_pointgoal_bridge.py --config config/pointgoal_v3.yaml
 
 `config/training_selection.json.gz` defines our training subset: 118,143 `without_obj` and 57,750 `with_obj` trajectories (175,893 total). Each record identifies the source directory, scene and trajectory; `prepare_data.py` reads only these records and checks trajectory lengths. It builds a stride-4 LMDB cache; training uses stride-8 windows with 16 waypoints. Do not manually subsample the raw frames. Evaluation uses only the 4,084 trajectories listed in `config/evaluation_episodes.json`, from the upstream evaluation split.
 
+Training-cache preparation does not require evaluation trajectories. Add `--check-evaluation` to `prepare_data.py` only when you also want to check their availability.
+
 Use a fresh LMDB output directory and leave caches writable. Map preparation calibrates floorplans against the scene assets; first training builds A* path caches. Data and scene assets are not included in this repository.
 
 ## Training
@@ -66,6 +68,15 @@ CUDA_VISIBLE_DEVICES=0,1,2 OMP_NUM_THREADS=2 torchrun --standalone --nproc_per_n
 Defaults: 5 epochs, batch size 16 per GPU and Adam learning rate `1e-4`. The final checkpoint is `runs/pointgoal_v3/planner_epoch_5_final.pth`. Changing the GPU count changes the training schedule; use three processes for the supplied protocol.
 
 ## Evaluation
+
+To evaluate the published reference controller, complete setup and prepare the evaluation data and scene assets, then run:
+
+```bash
+python scripts/download_weights.py
+CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=2 bash scripts/evaluate.sh checkpoints/controller_navigation.pth results/pointgoal_v3_reference
+```
+
+The complete checkpoint is hosted in [GitHub Releases](https://github.com/BoLeiChen/FloNa-Bridger/releases/tag/hm3d-reference-weights-v1); `config/weights.json` pins its size and SHA-256. Training data and LMDB are unnecessary for reference evaluation. To evaluate your own training result:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=2 bash scripts/evaluate.sh \
