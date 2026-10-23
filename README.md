@@ -34,7 +34,7 @@ Depth guidance uses the simulator's metric depth; no separate depth-estimation c
 
 ## Data preparation
 
-Download the training and PointGoal evaluation data from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k), extract the per-scene archives, and arrange or link the directories as follows. This branch uses HM3D data; the Gibson dataset used by `main` is not compatible.
+Our dataset is a fixed HM3D subset reorganized from [FloVerse-1.6k (original data download)](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k). Download `train_without_obj/HM3D` and `train_with_obj`, plus `eval_without_obj/HM3D`. Extract the per-scene archives, preserve scene/trajectory names and all frames, and place or symlink the extracted scene folders under the following paths.
 
 ```text
 data/
@@ -52,7 +52,9 @@ python scripts/prepare_data.py --config config/pointgoal_v3.yaml
 python utils/prepare_pointgoal_bridge.py --config config/pointgoal_v3.yaml
 ```
 
-Preparation uses the included training selection and checks the fixed evaluation references. Use a fresh LMDB output directory and leave the cache directories writable. First training also builds A* path caches. Data and scene assets are not included in this code repository.
+`config/training_selection.json.gz` defines our training subset: 118,143 `without_obj` and 57,750 `with_obj` trajectories (175,893 total). Each record identifies the source directory, scene and trajectory; `prepare_data.py` reads only these records and checks trajectory lengths. It builds a stride-4 LMDB cache; training uses stride-8 windows with 16 waypoints. Do not manually subsample the raw frames. Evaluation uses only the 4,084 trajectories listed in `config/evaluation_episodes.json`, from the upstream evaluation split.
+
+Use a fresh LMDB output directory and leave caches writable. Map preparation calibrates floorplans against the scene assets; first training builds A* path caches. Data and scene assets are not included in this repository.
 
 ## Training
 
