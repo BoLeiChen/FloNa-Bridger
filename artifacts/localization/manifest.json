@@ -1,0 +1,55 @@
+{
+  "localizer.ckpt": {
+    "bytes": 110598104,
+    "sha256": "159b032fd83d0b41e7dac9fd4bd986d347e8014ba461d52a05d144b0f91c2155",
+    "parts": [
+      {
+        "path": "localizer.ckpt.part-00",
+        "bytes": 41943040,
+        "sha256": "b5749852a01218f78e8493ed365d556fc92246d7fa9bcda3ec731bab66e46d9b"
+      },
+      {
+        "path": "localizer.ckpt.part-01",
+        "bytes": 41943040,
+        "sha256": "7dd4d2ae89b3e118bb9cc8fef3529f023d079c80bae3c9ec8001474f3f915459"
+      },
+      {
+        "path": "localizer.ckpt.part-02",
+        "bytes": 26712024,
+        "sha256": "2ab0e2fda34f4019aea97f00f0258d79d386d612fc2a0c8c84a4fac9fd5ca8ff"
+      }
+    ]
+  },
+  "disco.pt": {
+    "bytes": 5678786,
+    "sha256": "9a931d509398f9f22ae768097f45aa1f189264db72b44c9f91b91391dd71090e",
+    "parts": [
+      {
+        "path": "disco.pt.part-00",
+        "bytes": 5678786,
+        "sha256": "9a931d509398f9f22ae768097f45aa1f189264db72b44c9f91b91391dd71090e"
+      }
+    ]
+  },
+  "refiner_init.ckpt": {
+    "bytes": 108627756,
+    "sha256": "f64a2b3ef664529437054f8e65f0c5bb715a26f0c09aa846654f296442518314",
+    "parts": [
+      {
+        "path": "refiner_init.ckpt.part-00",
+        "bytes": 41943040,
+        "sha256": "dd25dc970d528bfc39b4904dcf07860e03ece170f535c0c45240a9b319576543"
+      },
+      {
+        "path": "refiner_init.ckpt.part-01",
+        "bytes": 41943040,
+        "sha256": "3400c50a747a243022a577c05f605fc2cede2b5ca1b0aa7eebe7d0779ce6e801"
+      },
+      {
+        "path": "refiner_init.ckpt.part-02",
+        "bytes": 24741676,
+        "sha256": "eb81401b3483e9091a1d36c5046684389199b0759ee5d84ebfe3ca250fc758a8"
+      }
+    ]
+  }
+}

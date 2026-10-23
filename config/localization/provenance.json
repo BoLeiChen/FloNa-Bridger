@@ -1,0 +1,30 @@
+{
+  "source": "CF2Loc-HM3D 2026-09-08 building split; object_disco_quality8_20260930 snapshot",
+  "frame_counts": {
+    "train": 997054,
+    "val": 123324,
+    "test": 118133
+  },
+  "building_counts": {
+    "train": 436,
+    "val": 54,
+    "test": 55
+  },
+  "construction": "Frozen frame/pose rows, calibrated maps rebuilt from FloVerse floorplans; PNG bytes copied into independent localization LMDB. Object labels rebuilt from original object/object.json.",
+  "index_files": {
+    "train.bin.gz": "820becb2aacc4a1d094f818f1820f271c5da57012f06e2494c320511e6b2f433",
+    "index.json.gz": "a6d9df710a87453af891902bf1ecaecddf4324e4beceda0810cb3a56c7ea4f32",
+    "test.bin.gz": "769abe9031d04c8a37fc3624f3fc25e946bb15cec8dc86369dda99db74589246",
+    "val.bin.gz": "65fc5a47eb0d8cd768c75d3c821bbf0566fe731b32f0e6ebeddd9dbd8e8d5a87"
+  },
+  "full_training_repeated_for_release": false,
+  "release_validation": {
+    "date": "2026-10-23",
+    "server_gpu": "NVIDIA GeForce RTX 3090",
+    "existing_navigation_tests_passed": 130,
+    "new_manifest_and_weight_tests_passed": 2,
+    "data_reconstruction": "All 1238511 pose rows byte-identical to reference; sampled calibrated maps pixel-identical; four-frame LMDB built",
+    "training_smoke": "Diffusion 10 optimizer steps; refiner 2 steps; ranker train/validation candidate mining and 3 optimization steps with validation/checkpoint export",
+    "full_training_repeated": false
+  }
+}

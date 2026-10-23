@@ -51,7 +51,13 @@ Place the experiment's pretrained weights in `checkpoints/`:
 | `controller_training.pth` | Frozen controller used to train the selector |
 | `controller_navigation.pth` | Controller used during V3 navigation |
 
-These experiment weights are **not included or hosted by this code branch**. Obtain them from the experiment owner before preparing hypotheses; `config/pretrained_weights.json` identifies the exact files by SHA-256. The localization and ranking models remain frozen in the training workflow below. Simulator depth supplies guidance, so no additional depth-estimation model is needed.
+Localization and ranking weights are included as checked binary parts. Restore them with:
+
+```bash
+python scripts/prepare_weights.py
+```
+
+Controller weights are not included: train them using the commands below or supply the reference checkpoints identified in `config/pretrained_weights.json`. To reconstruct localization training data and train the localization/ranking models, follow [Localization training](docs/LOCALIZATION.md). The navigation workflow below freezes these models; simulator depth supplies trajectory guidance.
 
 Build the training cache, maps, goal hypotheses and held-out validation samples:
 
@@ -105,4 +111,4 @@ The supplied V3 route guidance includes collision, unknown-space, boundary, shap
 
 Keep `sampling_identity_roots` unchanged when relocating data: these are hash namespaces, not paths to open. Retain the `with_obj`/`without_obj` source directory names. They preserve the reference selector sampling and validation choices across machines. Rebuild validation caches created before this fix.
 
-The archived ImageGoal evaluation silently used zero floor height because its scene-asset link was missing. This release uses the actual floor heights and now fails on missing/invalid `floors.txt`; its corrected evaluation must be rerun in full before reporting new metrics. The historical numbers are not a verified target for this corrected setup. See `config/reproduction_audit.json` for checkpoint hashes and audit scope. The listed pretrained weights are still required separately; full retraining has not been repeated in this audit.
+The archived ImageGoal evaluation silently used zero floor height because its scene-asset link was missing. This release uses the actual floor heights and now fails on missing/invalid `floors.txt`; its corrected evaluation must be rerun in full before reporting new metrics. The historical numbers are not a verified target for this corrected setup. See `config/reproduction_audit.json` for checkpoint hashes and audit scope. Controller weights are required separately or must be trained; full retraining has not been repeated in this audit.
