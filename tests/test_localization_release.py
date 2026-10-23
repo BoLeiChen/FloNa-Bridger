@@ -28,30 +28,34 @@ def test_frozen_localization_manifests():
     assert all(not Path(s['path']).is_absolute() for s in index['scenes'])
     assert all(not Path(t['path']).is_absolute() for t in index['trajectories'])
 
-def test_weight_restore_integrity_and_overwrite_protection(tmp_path):
-    spec=importlib.util.spec_from_file_location('restore',ROOT/'scripts/prepare_weights.py')
+def test_complete_file_download_integrity_and_overwrite_protection(tmp_path):
+    spec=importlib.util.spec_from_file_location('download_weights',ROOT/'scripts/download_weights.py')
     mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
-    source=tmp_path/'source';source.mkdir();out=tmp_path/'out'
-    payload=b'original checkpoint';part=source/'a.part';part.write_bytes(payload)
-    h=hashlib.sha256(payload).hexdigest()
-    (source/'manifest.json').write_text(json.dumps({'a.pt':dict(bytes=len(payload),sha256=h,parts=[dict(path='a.part',bytes=len(payload),sha256=h)])}))
-    mod.assemble(source,out);assert (out/'a.pt').read_bytes()==payload
-    mod.assemble(source,out)
-    (out/'a.pt').write_bytes(b'local training checkpoint')
-    with pytest.raises(FileExistsError):mod.assemble(source,out)
-    (out/'a.pt').unlink();part.write_bytes(b'corrupted download')
-    with pytest.raises(ValueError):mod.assemble(source,out)
-    assert not (out/'a.pt').exists()
-    assert not (out/'a.pt.partial').exists()
+    source=tmp_path/'original.pt';payload=b'complete original checkpoint';source.write_bytes(payload)
+    info=dict(url=source.as_uri(),bytes=len(payload),sha256=hashlib.sha256(payload).hexdigest())
+    output=tmp_path/'output'
+    mod.download_one('model.pt',info,output)
+    assert (output/'model.pt').read_bytes()==payload
+    mod.download_one('model.pt',info,output)
+    (output/'model.pt').write_bytes(b'locally trained checkpoint')
+    with pytest.raises(FileExistsError):mod.download_one('model.pt',info,output)
+    (output/'model.pt').unlink();source.write_bytes(b'corrupted download')
+    with pytest.raises(ValueError):mod.download_one('model.pt',info,output)
+    assert not (output/'model.pt').exists()
+    assert not (output/'model.pt.download').exists()
 
 
-def test_navigation_weight_manifest_matches_reference_pins():
+def test_complete_weight_urls_match_reference_pins():
     pins=json.loads((ROOT/'config/pretrained_weights.json').read_text())
-    manifest=json.loads((ROOT/'artifacts/navigation/manifest.json').read_text())
+    manifest=json.loads((ROOT/'config/weights.json').read_text())['files']
     audit=json.loads((ROOT/'config/reproduction_audit.json').read_text())
     assert manifest['selector.pth']['sha256']==audit['reference_selector_sha256']
     assert manifest['controller_navigation.pth']['sha256']==audit['reference_controller_sha256']
-    for name,info in manifest.items():
-        assert info['sha256']==pins[name]
-        assert sum(part['bytes'] for part in info['parts'])==info['bytes']
-        assert all(part['bytes']<=40*1024**2 for part in info['parts'])
+    assert set(pins)-set(manifest) <= {'ViT-B-16.pt'}  # Official CLIP download stays external.
+    for name,digest in pins.items():
+        if name=='ViT-B-16.pt':continue
+        assert manifest[name]['sha256']==digest
+        assert manifest[name]['bytes']>0
+        assert '/releases/download/hm3d-reference-weights-v1/' in manifest[name]['url']
+        assert '.part-' not in manifest[name]['url']
+    assert 'refiner_init.ckpt' not in manifest

@@ -7,7 +7,7 @@ ObjectGoal route-selector training and evaluation with a frozen PointGoal contro
 Use Linux with NVIDIA GPUs; the supplied training protocol uses three GPUs.
 
 ```bash
-git clone --branch objectgoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
+git clone --depth 1 --branch objectgoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
 cd FloNa-Bridger
 conda env create -f environment.yaml
 conda activate flona-objectgoal
@@ -43,23 +43,23 @@ curl -fL --retry 3 -o checkpoints/depth_anything_v2_vits.pth \
 python -c "import clip; clip.load('ViT-B/16', device='cpu', download_root='checkpoints')"
 ```
 
-The supplied reference weights are restored into `checkpoints/`:
+Download the reference weights as **complete files** from [GitHub Releases](https://github.com/BoLeiChen/FloNa-Bridger/releases/tag/hm3d-reference-weights-v1). The command below saves them to `checkpoints/`:
 
 | File | Required for |
 |---|---|
-| `object_localizer.pt` | Frozen category-conditioned goal localization |
-| `object_disco.pt` | Frozen object-hypothesis ranking |
-| `controller_training.pth` | Frozen controller used to train the selector |
-| `controller_navigation.pth` | Controller used during V3 navigation |
-| `selector.pth` | Reference objectgoal path selector for evaluation |
+| [`object_localizer.pt`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/object_localizer.pt) | Frozen category-conditioned goal localization |
+| [`object_disco.pt`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/object_disco.pt) | Frozen object-hypothesis ranking |
+| [`controller_training.pth`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/controller_training.pth) | Frozen controller used to train the selector |
+| [`controller_navigation.pth`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/controller_navigation.pth) | Controller used during V3 navigation |
+| [`selector.pth`](https://github.com/BoLeiChen/FloNa-Bridger/releases/download/hm3d-reference-weights-v1/objectgoal_selector.pth) | Reference objectgoal path selector for evaluation |
 
-Localization, ranking, controller and selector weights are included as checked binary parts. Restore all of them with:
+Download localization, ranking, controller and selector weights with SHA-256 verification:
 
 ```bash
-python scripts/prepare_weights.py
+python scripts/download_weights.py
 ```
 
-`config/pretrained_weights.json` records the reference SHA-256 hashes. The restore script verifies every part and refuses to overwrite different existing weights. For evaluation with the supplied selector, complete setup, download the visual backbone(s), restore weights and prepare only `data/eval_with_obj` plus the scene assets; then go directly to **Evaluation**. Training caches are unnecessary for this path. To train localization/ranking models, follow [Localization training](docs/LOCALIZATION.md).
+`config/pretrained_weights.json` records the reference SHA-256 hashes. `config/weights.json` lists complete-file URLs, sizes and hashes. The downloader refuses to overwrite different existing weights. The task-specific selector asset is saved as `checkpoints/selector.pth`. For evaluation with the supplied selector, complete setup, download the visual backbone(s), download weights and prepare only `data/eval_with_obj` plus the scene assets; then go directly to **Evaluation**. Training caches are unnecessary for this path. To train localization/ranking models, follow [Localization training](docs/LOCALIZATION.md).
 
 Prepare the training cache, maps, category hypotheses and validation samples:
 

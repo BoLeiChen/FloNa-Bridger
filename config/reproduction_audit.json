@@ -14,7 +14,7 @@
     "gpu": "NVIDIA GeForce RTX 3090"
   },
   "guidance": "V3 route: collision, unknown, boundary, shape, motion and goal costs; not collision-only",
-  "checkpoint_availability": "Reference localization, controller and selector weights are included as verified parts under artifacts/. Public backbone downloads are documented in README.md.",
+  "checkpoint_availability": "Complete reference checkpoint files are hosted in GitHub Releases; config/weights.json records download URLs, sizes and SHA-256. Public backbone downloads are documented in README.md.",
   "task": "objectgoal",
   "reference_selector_sha256": "38c22052763bbaf54d81197ddc8248d451918bf3f82d10161f6791af712dcdf8",
   "reference_controller_sha256": "764427dfe3fb163cf42fc2fd7e2e6fec83fd3253b86784a1641158ce9a5caf18",

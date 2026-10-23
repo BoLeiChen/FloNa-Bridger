@@ -2,13 +2,13 @@
 
 Run from the repository root in the environment installed in the main README. Download the complete `train_without_obj/HM3D` and `train_with_obj` archives from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k), preserving scene/trajectory names. Install the scene assets and pretrained visual backbone as described in the README. Localization uses additional frames beyond the navigation selection; do not download only the navigation subset.
 
-## Restore reference weights (skip training)
+## Download reference weights (skip training)
 
 ```bash
-python scripts/prepare_weights.py
+python scripts/download_weights.py
 ```
 
-The versioned binary parts reconstruct the original checkpoints under `checkpoints/`, with SHA-256 verification. This restores localization weights, both PointGoal controllers and the branch-specific reference path selector. You can run navigation evaluation directly using the main README. An existing different checkpoint is never overwritten. Use a different `--output` directory if needed. Public backbone weights are downloaded separately.
+The [release](https://github.com/BoLeiChen/FloNa-Bridger/releases/tag/hm3d-reference-weights-v1) provides complete checkpoint files. The downloader verifies SHA-256 and saves localization models, both PointGoal controllers and the branch-specific reference path selector under `checkpoints/`; no assembly is needed. Existing different checkpoints are never overwritten; use a different `--output` directory if needed. Public backbone weights are downloaded separately.
 
 ## Reconstruct training data
 
