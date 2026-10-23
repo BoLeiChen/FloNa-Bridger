@@ -21,6 +21,8 @@ python -m igibson.utils.assets_utils --download_assets
 
 Install iGibson's [native dependencies](https://github.com/StanfordVL/iGibson) and ensure NVIDIA OpenGL/EGL works. Extract `floverse_scene_dataset.tar` from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k) into `iGibson/igibson/data/`, producing `g_dataset/`. Preserve the complete scene assets, including object annotations.
 
+Choose **reference evaluation**, **selector-only training**, or **full staged training** using the [pipeline guide](docs/PIPELINE.md). It lists the data, parent weights and output consumed at every stage.
+
 ## Data and pretrained models
 
 Our dataset is a fixed HM3D subset reorganized from [FloVerse-1.6k (original data download)](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k). Download `train_without_obj/HM3D` and `train_with_obj`, plus `eval_with_obj`. Extract the per-scene archives, preserve scene/trajectory names and all frames, and place or symlink the extracted scene folders under the following paths.
@@ -61,7 +63,7 @@ python scripts/download_weights.py
 
 `config/pretrained_weights.json` records the reference SHA-256 hashes. `config/weights.json` lists complete-file URLs, sizes and hashes. The downloader refuses to overwrite different existing weights. The task-specific selector asset is saved as `checkpoints/selector.pth`. For evaluation with the supplied selector, complete setup, download the visual backbone(s), download weights and prepare only `data/eval_with_obj` plus the scene assets; then go directly to **Evaluation**. Training caches are unnecessary for this path. To train localization/ranking models, follow [Localization training](docs/LOCALIZATION.md).
 
-Prepare the training cache, maps, category hypotheses and validation samples:
+For selector-only training with the reference localization pair, prepare the training cache, maps, category hypotheses and validation samples:
 
 ```bash
 python scripts/prepare_data.py --config config/objectgoal_v3.yaml
@@ -72,9 +74,13 @@ CUDA_VISIBLE_DEVICES=0 python utils/prepare_topk_routes.py --config config/objec
 
 `config/training_selection.json.gz` selects 118,143 `without_obj` and 57,750 `with_obj` trajectories for the shared controller cache. `prepare_data.py` checks their lengths and builds a stride-4 LMDB cache; training uses stride-8 windows with 16 waypoints, so keep all raw frames. The ObjectGoal selector uses only `with_obj`: holding out the 40 training buildings in `config/object_validation_buildings.json` leaves 48,000 training trajectories. `--build-validation` creates the selector validation samples; this holdout does not apply to the PointGoal controllers. Evaluation uses only the 1,710 upstream evaluation trajectories in `config/objectgoal_eval_1710.json`, with target categories and positions from the object annotations.
 
+Evaluation trajectories are not required to construct the training cache; `prepare_data.py --check-evaluation` optionally checks them.
+
 Use fresh LMDB and validation-cache paths. Keep caches writable and rebuild them after changing their inputs or paths.
 
 ## Training
+
+The commands below train the path selector with prepared parent models. For full retraining, train both controllers and the localization/ranking pair first, following [the stage order](docs/PIPELINE.md#c-train-all-task-specific-stages).
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1,2 OMP_NUM_THREADS=2 torchrun --standalone --nproc_per_node=3 \
