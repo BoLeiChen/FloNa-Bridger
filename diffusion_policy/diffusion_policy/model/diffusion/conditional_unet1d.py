@@ -2,7 +2,6 @@ from typing import Union
 import logging
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import einops
 from einops.layers.torch import Rearrange
 
@@ -13,9 +12,9 @@ from diffusion_policy.model.diffusion.positional_embedding import SinusoidalPosE
 logger = logging.getLogger(__name__)
 
 class ConditionalResidualBlock1D(nn.Module):
-    def __init__(self, 
-            in_channels, 
-            out_channels, 
+    def __init__(self,
+            in_channels,
+            out_channels,
             cond_dim,
             kernel_size=3,
             n_groups=8,
@@ -68,7 +67,7 @@ class ConditionalResidualBlock1D(nn.Module):
 
 
 class ConditionalUnet1D(nn.Module):
-    def __init__(self, 
+    def __init__(self,
         input_dim,
         local_cond_dim=None,
         global_cond_dim=None,
@@ -102,12 +101,12 @@ class ConditionalUnet1D(nn.Module):
             local_cond_encoder = nn.ModuleList([
                 # down encoder
                 ConditionalResidualBlock1D(
-                    dim_in, dim_out, cond_dim=cond_dim, 
+                    dim_in, dim_out, cond_dim=cond_dim,
                     kernel_size=kernel_size, n_groups=n_groups,
                     cond_predict_scale=cond_predict_scale),
                 # up encoder
                 ConditionalResidualBlock1D(
-                    dim_in, dim_out, cond_dim=cond_dim, 
+                    dim_in, dim_out, cond_dim=cond_dim,
                     kernel_size=kernel_size, n_groups=n_groups,
                     cond_predict_scale=cond_predict_scale)
             ])
@@ -131,11 +130,11 @@ class ConditionalUnet1D(nn.Module):
             is_last = ind >= (len(in_out) - 1)
             down_modules.append(nn.ModuleList([
                 ConditionalResidualBlock1D(
-                    dim_in, dim_out, cond_dim=cond_dim, 
+                    dim_in, dim_out, cond_dim=cond_dim,
                     kernel_size=kernel_size, n_groups=n_groups,
                     cond_predict_scale=cond_predict_scale),
                 ConditionalResidualBlock1D(
-                    dim_out, dim_out, cond_dim=cond_dim, 
+                    dim_out, dim_out, cond_dim=cond_dim,
                     kernel_size=kernel_size, n_groups=n_groups,
                     cond_predict_scale=cond_predict_scale),
                 Downsample1d(dim_out) if not is_last else nn.Identity()
@@ -155,7 +154,7 @@ class ConditionalUnet1D(nn.Module):
                     cond_predict_scale=cond_predict_scale),
                 Upsample1d(dim_in) if not is_last else nn.Identity()
             ]))
-        
+
         final_conv = nn.Sequential(
             Conv1dBlock(start_dim, start_dim, kernel_size=kernel_size),
             nn.Conv1d(start_dim, input_dim, 1),
@@ -172,9 +171,9 @@ class ConditionalUnet1D(nn.Module):
         )
 
     def forward(self,
-            sample: torch.Tensor, 
-            timestep: Union[torch.Tensor, float, int], 
-            local_cond = None, global_cond = None):
+            sample: torch.Tensor,
+            timestep: Union[torch.Tensor, float, int],
+            local_cond=None, global_cond=None, **kwargs):
         """
         x: (B,T,input_dim)
         timestep: (B,) or int, diffusion step
@@ -200,7 +199,7 @@ class ConditionalUnet1D(nn.Module):
             global_feature = torch.cat([
                 global_feature, global_cond
             ], axis=-1)
-        
+
         # encode local features
         h_local = list()
         if local_cond is not None:
@@ -210,7 +209,7 @@ class ConditionalUnet1D(nn.Module):
             h_local.append(x)
             x = resnet2(local_cond, global_feature)
             h_local.append(x)
-        
+
         x = sample
         h = []
         for idx, (resnet, resnet2, downsample) in enumerate(self.down_modules):
@@ -227,13 +226,14 @@ class ConditionalUnet1D(nn.Module):
         for idx, (resnet, resnet2, upsample) in enumerate(self.up_modules):
             x = torch.cat((x, h.pop()), dim=1)
             x = resnet(x, global_feature)
+            # The correct condition should be:
+            # if idx == (len(self.up_modules)-1) and len(h_local) > 0:
+            # However this change will break compatibility with published checkpoints.
+            # Therefore it is left as a comment.
+            if idx == len(self.up_modules) and len(h_local) > 0:
+                x = x + h_local[1]
             x = resnet2(x, global_feature)
             x = upsample(x)
-            if idx == (len(self.up_modules) - 1) and len(h_local) > 0:
-                h_local_up = h_local[1]
-                if h_local_up.shape[-1] != x.shape[-1]:
-                    h_local_up = F.interpolate(h_local_up, size=x.shape[-1], mode='nearest')
-                x = x + h_local_up
 
         x = self.final_conv(x)
 

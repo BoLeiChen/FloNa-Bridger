@@ -1,0 +1,11 @@
+{
+  "source_branch": "feat/bridge-depth-v3-validation",
+  "source_commit": "2ae0d9c3a2e5910249b4b91d90273d6da0aeb9ca",
+  "training_source_commit": "c17c32f0a7c64d616b3ab408a08fe3204b8af2b6",
+  "guidance_variant": "route",
+  "training_epochs": 5,
+  "training_world_size": 3,
+  "evaluation_episodes": 4084,
+  "igibson_commit": "7d9598278b95ec1039e1f4366c66b45346521e44",
+  "diffusion_policy_commit": "5ba07ac6661db573af695b419a7947ecb704690f"
+}

@@ -1,88 +1,79 @@
-# FloNavBridger
+# FloNavBridger — HM3D V3 route
 
-PointGoal navigation on Gibson. Run the commands below from the repository root.
+PointGoal training and evaluation with V3 route depth guidance. Run all commands from the repository root.
 
 ## Setup
 
-Use Linux with an NVIDIA GPU.
+Use Linux and NVIDIA GPUs. The training configuration uses three GPUs.
 
 ```bash
-git clone https://github.com/BoLeiChen/FloNa-Bridger.git
+git clone --branch pointgoal-hm3d-v3 --single-branch https://github.com/BoLeiChen/FloNa-Bridger.git
 cd FloNa-Bridger
 conda env create -f environment.yaml
-conda activate vgcnav
+conda activate flona-hm3d
 python -m pip install -e .
-```
 
-For closed-loop evaluation, install iGibson and its [native dependencies and scene assets](https://github.com/StanfordVL/iGibson):
-
-```bash
 git clone https://github.com/StanfordVL/iGibson.git iGibson
 git -C iGibson checkout 7d9598278b95ec1039e1f4366c66b45346521e44
 git -C iGibson submodule update --init --recursive
 python -m pip install -e ./iGibson
+python -m igibson.utils.assets_utils --download_assets
 ```
 
-Place Gibson scene assets under `iGibson/igibson/data/g_dataset/`. Evaluation requires working NVIDIA OpenGL/EGL libraries compatible with the installed driver.
+Install iGibson's [native dependencies](https://github.com/StanfordVL/iGibson) and ensure NVIDIA OpenGL/EGL works. Download and extract `floverse_scene_dataset.tar` from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k) into `iGibson/igibson/data/`, producing `g_dataset/`.
+
+Download the visual-backbone weights:
+
+```bash
+mkdir -p checkpoints
+curl -fL --retry 3 -o checkpoints/depth_anything_v2_vits.pth \
+  https://huggingface.co/depth-anything/Depth-Anything-V2-Small/resolve/main/depth_anything_v2_vits.pth
+```
+
+Depth guidance uses the simulator's metric depth; no separate depth-estimation checkpoint is required.
 
 ## Data preparation
 
-Download the prepared [Gibson dataset](https://huggingface.co/datasets/chenbolei/FloNaBridger-Gibson), containing 67 training and 50 test scene-floor entries. Allow at least 70 GB for the download and extraction.
-
-```bash
-python -m pip install "huggingface_hub==0.36.2"
-hf download chenbolei/FloNaBridger-Gibson \
-  --repo-type dataset --local-dir ../FloNaBridger-Gibson
-python scripts/extract_hf_dataset.py --source ../FloNaBridger-Gibson --destination .
-python scripts/validate_dataset.py
-```
-
-Extraction creates `data/` and refuses to overwrite an existing directory:
+Download the training and PointGoal evaluation data from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k), extract the per-scene archives, and arrange or link the directories as follows. This branch uses HM3D data; the Gibson dataset used by `main` is not compatible.
 
 ```text
 data/
-  scenes_117/{train,test}/<scene_floor>/
-    floorplan.png
-    planner_floorplan.png
-    traj_<id>/
-  trav_maps/
+  train_without_obj/HM3D/<scene_floor>/
+  train_with_obj/<scene_floor>/
+  eval_without_obj/HM3D/<scene_floor>/
 ```
 
-Keep this layout intact. The default configs use `data_root: data`; change it in both training and evaluation configs if needed. The first training run builds caches, so the data directory must be writable. Simulator assets and model weights are downloaded separately.
+Each scene contains `floorplan.png` and `traj_<id>/`. Training trajectories require `traj_<id>.txt`, `rgb/*.png` and `depth/*.png`; keep `object.json` where present. If using different locations, edit `data_folder`, `eval_data_folder`, `lmdb_path`, `map_cache`, `prior_cache` and `scene_assets` in `config/pointgoal_v3.yaml`.
 
-## Pretrained weights
-
-Prepare both the policy backbone and metric-depth weights:
+Build the training cache and calibrated maps:
 
 ```bash
-mkdir -p checkpoints external
-git clone https://github.com/DepthAnything/Depth-Anything-V2.git external/Depth-Anything-V2
-git -C external/Depth-Anything-V2 checkout a561b849ebae10a6f5ef49e26c83cbbcd36c71bf
-curl -fL --retry 3 -o checkpoints/depth_anything_v2_vits.pth \
-  https://huggingface.co/depth-anything/Depth-Anything-V2-Small/resolve/main/depth_anything_v2_vits.pth
-curl -fL --retry 3 -o checkpoints/depth_anything_v2_metric_hypersim_vits.pth \
-  https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Small/resolve/main/depth_anything_v2_metric_hypersim_vits.pth
+python scripts/prepare_data.py --config config/pointgoal_v3.yaml
+python utils/prepare_pointgoal_bridge.py --config config/pointgoal_v3.yaml
 ```
+
+Preparation uses the included training selection and checks the fixed evaluation references. Use a fresh LMDB output directory and leave the cache directories writable. First training also builds A* path caches. Data and scene assets are not included in this code repository.
 
 ## Training
 
 ```bash
-python training/train.py --config training/pointgoal_v3.yaml --run_name pointgoal_v3
+CUDA_VISIBLE_DEVICES=0,1,2 OMP_NUM_THREADS=2 torchrun --standalone --nproc_per_node=3 \
+  utils/train_pointgoal_bridge.py --config config/pointgoal_v3.yaml --run-name pointgoal_v3
 ```
 
-The default configuration trains for 6 epochs with batch size 64. Adjust `gpu_ids` and `batch_size` in the YAML if needed. The final EMA checkpoint is `logs/VGCNav/pointgoal_v3/ema_5.pth`.
+Defaults: 5 epochs, batch size 16 per GPU and Adam learning rate `1e-4`. The final checkpoint is `runs/pointgoal_v3/planner_epoch_5_final.pth`. Changing the GPU count changes the training schedule; use three processes for the supplied protocol.
 
 ## Evaluation
 
-Run the 500-episode evaluation using the trained checkpoint, then verify and aggregate all results:
-
 ```bash
-NUM_WORKERS=1 TRAJ_PER_SCENE=10 bash scripts/run_navibridger_eval.sh \
-  experiments/alpha_0p7_depth_route_full.yaml \
-  logs/VGCNav/pointgoal_v3/ema_5.pth \
-  pointgoal_v3_full logs/pointgoal_v3_full.log
-python results/evaluate.py --exp_name pointgoal_v3_full \
-  --config experiments/alpha_0p7_depth_route_full.yaml --require-full-benchmark
+CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=2 bash scripts/evaluate.sh \
+  runs/pointgoal_v3/planner_epoch_5_final.pth results/pointgoal_v3
 ```
 
-Use a new run/experiment name for each run. Trajectories are saved under `results/exps/<exp_name>/trajectory/`, and metrics are written to `evaluation_summary.csv`. The launcher uses `/usr/share/glvnd/egl_vendor.d/10_nvidia.json`; override `__EGL_VENDOR_LIBRARY_FILENAMES` if your NVIDIA EGL configuration is elsewhere.
+The launcher enables `config/depth_v3_route.yaml`, evaluates the fixed 4,084 episodes and writes `results/pointgoal_v3/summary.json`. Use a new run/output directory each time. For another evaluation data location, set `EVAL_DATA_ROOT`. Configure `__EGL_VENDOR_LIBRARY_FILENAMES` if your driver requires a custom EGL path.
+
+To recompute metrics from saved rollouts:
+
+```bash
+python scripts/score.py --output results/pointgoal_v3 --scenes-dir data/eval_without_obj/HM3D
+```

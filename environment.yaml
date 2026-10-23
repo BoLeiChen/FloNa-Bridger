@@ -1,35 +1,26 @@
-name: vgcnav
-
-channels:
-  - pytorch
-  - nvidia
-  - conda-forge
-
+name: flona-hm3d
+channels: [pytorch, nvidia, conda-forge]
 dependencies:
   - python=3.8.20
   - pip
-  - pytorch=2.4.1
-  - torchvision=0.19.1
-  - pytorch-cuda=12.4
+  - pytorch=2.0.1
+  - torchvision=0.15.2
+  - pytorch-cuda=11.7
   - numpy=1.24.4
   - scipy=1.10.1
   - pillow=10.4.0
   - pyyaml
   - matplotlib
   - tqdm
-  - tensorboard
   - pip:
-      - diffusers==0.33.1
-      - wandb==0.12.18
-      - opencv-python==4.6.0.66
-      - h5py==3.6.0
-      - lmdb==1.5.1
-      - efficientnet-pytorch
-      - warmup-scheduler
+      - accelerate==1.0.1
+      - diffusers==0.31.0
+      - efficientnet-pytorch==0.7.1
       - einops==0.8.1
-      - pyastar2d
+      - omegaconf==2.3.0
+      - lmdb==1.8.1
+      - msgpack==1.1.1
+      - zstandard==0.23.0
       - gym==0.26.2
+      - pybullet-svl==3.1.6.4
       - pytest
-
-# iGibson is installed from a compatible local checkout after environment creation:
-#   python -m pip install -e ./iGibson
