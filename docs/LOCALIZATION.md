@@ -8,7 +8,7 @@ Run from the repository root in the environment installed in the main README. Do
 python scripts/prepare_weights.py
 ```
 
-The versioned binary parts reconstruct the original checkpoints under `checkpoints/`, with SHA-256 verification. This restores localization weights only; PointGoal controllers must still be trained or supplied as described in the main README. An existing different checkpoint is never overwritten. Use a different `--output` directory if needed. Public backbone weights are downloaded separately.
+The versioned binary parts reconstruct the original checkpoints under `checkpoints/`, with SHA-256 verification. This restores localization weights, both PointGoal controllers and the branch-specific reference path selector. You can run navigation evaluation directly using the main README. An existing different checkpoint is never overwritten. Use a different `--output` directory if needed. Public backbone weights are downloaded separately.
 
 ## Reconstruct training data
 

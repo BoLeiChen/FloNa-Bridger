@@ -43,3 +43,15 @@ def test_weight_restore_integrity_and_overwrite_protection(tmp_path):
     with pytest.raises(ValueError):mod.assemble(source,out)
     assert not (out/'a.pt').exists()
     assert not (out/'a.pt.partial').exists()
+
+
+def test_navigation_weight_manifest_matches_reference_pins():
+    pins=json.loads((ROOT/'config/pretrained_weights.json').read_text())
+    manifest=json.loads((ROOT/'artifacts/navigation/manifest.json').read_text())
+    audit=json.loads((ROOT/'config/reproduction_audit.json').read_text())
+    assert manifest['selector.pth']['sha256']==audit['reference_selector_sha256']
+    assert manifest['controller_navigation.pth']['sha256']==audit['reference_controller_sha256']
+    for name,info in manifest.items():
+        assert info['sha256']==pins[name]
+        assert sum(part['bytes'] for part in info['parts'])==info['bytes']
+        assert all(part['bytes']<=40*1024**2 for part in info['parts'])
