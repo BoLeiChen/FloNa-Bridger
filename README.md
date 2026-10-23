@@ -23,7 +23,7 @@ Install iGibson's [native dependencies](https://github.com/StanfordVL/iGibson) a
 
 ## Data and pretrained models
 
-Download and extract the HM3D training and ImageGoal evaluation trajectories from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k). Arrange or link them as follows:
+Our dataset is a fixed HM3D subset reorganized from [FloVerse-1.6k (original data download)](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k). Download `train_without_obj/HM3D` and `train_with_obj`, plus `eval_with_obj`. Extract the per-scene archives, preserve scene/trajectory names and all frames, and place or symlink the extracted scene folders under the following paths.
 
 ```text
 data/
@@ -32,7 +32,7 @@ data/
   eval_with_obj/<scene_floor>/
 ```
 
-Each scene needs `floorplan.png` and `traj_<id>/`, containing `traj_<id>.txt`, `rgb/*.png` and training `depth/*.png`. Preserve all RGB frames, including the final goal image. This branch uses HM3D, not the Gibson dataset linked on `main`. Edit paths in `config/imagegoal_v3.yaml` when necessary.
+Each scene needs `floorplan.png` and `traj_<id>/`, containing `traj_<id>.txt`, `rgb/*.png` and training `depth/*.png`. Preserve all RGB frames, including the final goal image. Edit paths in `config/imagegoal_v3.yaml` when necessary.
 
 Download the visual backbone:
 
@@ -62,7 +62,9 @@ CUDA_VISIBLE_DEVICES=0 python utils/prepare_topk_routes.py --config config/image
 CUDA_VISIBLE_DEVICES=0 python utils/prepare_topk_routes.py --config config/imagegoal_v3.yaml --device cuda:0 --build-validation
 ```
 
-Use fresh LMDB and validation-cache paths. The included selection fixes training trajectories and held-out buildings. Caches are tied to data and model paths; regenerate them after relocation. A cache prepared on the `pointgoal-hm3d-v3` branch can be reused with the same training roots.
+`config/training_selection.json.gz` selects 118,143 `without_obj` and 57,750 `with_obj` trajectories for the shared controller cache. `prepare_data.py` checks their lengths and builds a stride-4 LMDB cache; training uses stride-8 windows with 16 waypoints, so keep all raw frames. For ImageGoal selector training, `config/image_validation_buildings.json` holds out 92 training buildings, leaving 147,843 trajectories; validation samples are built by `--build-validation`. This holdout applies to the selector, not the PointGoal controllers. Evaluation uses only the 1,470 upstream evaluation trajectories in `config/imagegoal_eval_1470.json`; the final RGB frame provides the image goal.
+
+Use fresh LMDB and validation-cache paths. Regenerate caches after changing data/model paths. The PointGoal branch's LMDB can be reused with the same training roots.
 
 ## Training
 
