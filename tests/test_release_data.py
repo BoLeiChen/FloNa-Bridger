@@ -15,6 +15,8 @@ def test_extracted_cache_preserves_rgb_pose_and_manifest(tmp_path,monkeypatch):
     (tmp_path/'config/evaluation_episodes.json').write_text('[["00001-room_0", "traj_0"]]')
     root=tmp_path/'train'; scene=root/'00001-room_0'; traj=scene/'traj_0'
     (traj/'rgb').mkdir(parents=True);(traj/'depth').mkdir()
+    (traj/'object').mkdir()
+    (traj/'object/object.json').write_text(json.dumps({'object_category': 'chair'}))
     Image.new('L',(96,96),255).save(scene/'floorplan.png')
     poses=np.array([[t*.1,0,t*.1+1,0] for t in range(24)])
     np.savetxt(traj/'traj_0.txt',poses)
@@ -29,6 +31,7 @@ def test_extracted_cache_preserves_rgb_pose_and_manifest(tmp_path,monkeypatch):
         record=decode_record(txn.get(('traj::%s::00001-room_0::traj_0'%root).encode()))
         np.testing.assert_array_equal(record['poses'],poses)
         assert record['rgb'][7].min()==7
+        assert record['object_goal']=='chair'
         assert record['current_indices'].tolist()==[0,4,8]
     env.close()
     with pytest.raises(FileExistsError):prepare(cfg,dict(records=[]))

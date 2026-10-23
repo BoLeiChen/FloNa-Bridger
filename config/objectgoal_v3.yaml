@@ -1,9 +1,8 @@
 point_goal_train_prob: 0.0
-img_goal_train_prob: 1.0
-object_goal_train_prob: 0.0
+img_goal_train_prob: 0.0
+object_goal_train_prob: 1.0
 data_backend: lmdb
 data_folder:
-- data/train_without_obj/HM3D
 - data/train_with_obj
 lmdb_path: data/cache/lmdb
 scene_assets: iGibson/igibson/data/g_dataset
@@ -54,11 +53,11 @@ local_gate_coordinate_scale: 3.2
 mha_num_attention_heads: 4
 mha_dropout: 0.1
 gate_loss_weight: 0.01
-batch_size: 24
+batch_size: 4
 num_workers: 6
 lmdb_num_workers: 1
 prefetch_factor: 2
-gradient_accumulation_steps: 1
+gradient_accumulation_steps: 12
 mixed_precision: 'no'
 learning_rate: 0.0001
 optimizer: adamw
@@ -85,52 +84,23 @@ init_planner_checkpoint: null
 route_revisit_penalty: 0.25
 route_failure_penalty: 1.0
 controller_checkpoint: checkpoints/controller_training.pth
-validation_buildings_file: config/image_validation_buildings.json
-validation_samples: data/cache/image_validation_k16.pt
+validation_buildings_file: config/object_validation_buildings.json
+validation_samples: data/cache/object_validation_k64.pt
 min_learning_rate: 1.0e-06
-goal_top_k: 16
-exploration_candidates: 2
-goal_hypothesis_cache: data/cache/goal_hypotheses
-goal_localization:
-  mode: gt
-  diffusion_checkpoint: checkpoints/localizer.ckpt
-  diffusion_checkpoint_sha256: 159b032fd83d0b41e7dac9fd4bd986d347e8014ba461d52a05d144b0f91c2155
-  gibson_dataset_root: iGibson/igibson/data/g_dataset
-  map_resolution_m: 0.02
-  floorplan_input_size:
-  - 256
-  - 256
-  observation_size:
-  - 256
-  - 256
-  num_particles: 64
-  sample_steps: 10
-  belief_resolution_m: 0.25
-  belief_yaw_bins: 36
-  belief_free_space_threshold: 127
-  belief_auto_padding_m: 10.0
-  measurement_sigma_position_m: 0.35
-  measurement_sigma_yaw_deg: 12.0
-  motion_sigma_position_m: 0.1
-  motion_sigma_yaw_deg: 5.0
-  prior_uniform_mix: 0.02
-  measurement_uniform_mix: 0.01
-  estimate_mode_radius_m: 0.75
-  estimate_mode_radius_yaw_deg: 30.0
-  stage1_log_weight: 1.0
-  motion_log_weight: 1.0
-  confidence_gate_enabled: true
-  confidence_low_threshold: 0.4
-  confidence_high_threshold: 0.6
-  low_confidence_execute_steps: 4
-  medium_confidence_execute_steps: 8
-  initial_scan_step_deg: 45.0
-  collision_recovery_turn_deg: 45.0
-  cf2loc_disco_enabled: true
-  cf2loc_disco_checkpoint: checkpoints/disco.pt
-  cf2loc_disco_checkpoint_sha256: 9a931d509398f9f22ae768097f45aa1f189264db72b44c9f91b91391dd71090e
-  cf2loc_refiner_enabled: false
-  dinov2_checkpoint: checkpoints/depth_anything_v2_vits.pth
+goal_top_k: 64
+exploration_candidates: 8
+dynamic_candidate_training: true
+dynamic_goal_top_k:
+- 8
+- 16
+- 32
+- 48
+- 64
+dynamic_exploration_candidates:
+- 1
+- 2
+- 4
+- 8
 hypothesis_max_snap_m: 0.5
 goal_label_radius_m: 1.0
 goal_reject_loss_weight: 0.5
@@ -142,11 +112,19 @@ route_cooldown_cycles: 20
 route_cooldown_penalty: 4.0
 hypothesis_refresh_cycles: 10
 hypothesis_tail_train_fraction: 0.25
-route_task: image
-route_supervision: image-goal-region-v2
+route_task: object
+object_hypothesis_cache: data/cache/object_hypotheses
+object_localization:
+  code_root: third_party/cf2loc_object
+  diffusion_checkpoint: checkpoints/object_localizer.pt
+  disco_checkpoint: checkpoints/object_disco.pt
+  diffusion_sha256: 3ed32be20dabd9ce5ebe1a677fbe4704a951d023bcabe8f421ff9c22ed93e3cd
+  disco_sha256: e0f2650f85a051be53e3faed0818fc1aed8955d9f14d7b7751b5f33fe2860bac
+  clip_checkpoint: checkpoints/ViT-B-16.pt
+route_supervision: object-category-center-region-v2
 route_objective: hierarchical-v2
 route_policy_version: category-v2
-validation_design: image-source-floor-balanced-v2
+validation_design: category-balanced-v2
 validation_trajectories_per_building: 32
 validation_windows_per_trajectory: 4
 validation_tail_weight: 0.2
@@ -157,5 +135,8 @@ goal_reject_ema_alpha: 0.5
 goal_reject_confirm_cycles: 2
 validation_building_fraction: 0.15
 validation_min_buildings: 40
+cache_data_folder:
+- data/train_without_obj/HM3D
+- data/train_with_obj
 eval_data_folder: data/eval_with_obj
-eval_episodes_file: config/imagegoal_eval_1470.json
+eval_episodes_file: config/objectgoal_eval_1710.json

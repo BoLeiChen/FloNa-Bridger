@@ -21,7 +21,9 @@ class HypothesisScorer(GoalMatchingRouteScorer):
         values=torch.where(valid,logits,torch.zeros_like(logits));mean=values.sum(-1)/den
         maximum=logits.masked_fill(~valid,-1e4).amax(-1);maximum=torch.where(valid.any(-1),maximum,torch.zeros_like(maximum))
         prior=(batch['candidate_hypothesis'][...,0]*valid).sum(-1)/den
-        statistics=torch.stack([mean,maximum,prior,valid.float().mean(-1)],-1)
+        active=batch['candidate_mask'].sum(-1).clamp_min(1)
+        valid_fraction=valid.sum(-1)/active
+        statistics=torch.stack([mean,maximum,prior,valid_fraction],-1)
         rejection=self.reject_head(torch.cat([observed,target,observed*target,statistics],-1)).squeeze(-1)
         return logits,rejection
 

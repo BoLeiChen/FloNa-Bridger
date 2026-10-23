@@ -20,7 +20,7 @@ def frame_bytes(directory):
 
 
 def prepare(config, selection, max_trajectories=None, map_size_gb=600):
-    roots = [Path(p).resolve() for p in config['data_folder']]
+    roots = [Path(p).resolve() for p in config.get('cache_data_folder', config['data_folder'])]
     rows = selection['records'][:max_trajectories]
     output = Path(config['lmdb_path'])
     if output.exists():
@@ -50,7 +50,9 @@ def prepare(config, selection, max_trajectories=None, map_size_gb=600):
                 with env.begin(write=True) as txn:
                     txn.put(floor_key.encode(), encode_record({'floorplan': floor}, 3))
                 floors.add(floor_key)
-            obj = folder / 'object.json'
+            obj = folder / 'object' / 'object.json'
+            if not obj.is_file():
+                obj = folder / 'object.json'
             bundle = dict(poses=(folder / (trajectory + '.txt')).read_bytes(), rgb=frame_bytes(folder / 'rgb'), depth=frame_bytes(folder / 'depth'), object=obj.read_bytes() if obj.exists() else None)
             payload, count = process_and_encode(bundle, scene, trajectory, 4, 16, 3)
             if count != expected_count:

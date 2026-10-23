@@ -33,12 +33,12 @@ def main():
     # Reuse strict training-root checks; inference provider has no target-pose input.
     HypothesisRouteLMDB(c,manifest,0)
     heldout=set(json.loads(Path(c['validation_buildings_file']).read_text()))
-    design={};v2=c.get('validation_design') in ('category-balanced-v2','image-source-floor-balanced-v2')
+    design={};v2=c.get('validation_design')=='category-balanced-v2'
     if a.validation_manifest_only and not a.build_validation:raise ValueError('Manifest-only requires build-validation')
     if a.build_validation:
         if a.world_size!=1 or a.rank!=0:raise ValueError('Validation preparation is single-process')
         if v2:
-            manifest,design=select_category_validation(manifest,heldout,int(c.get('validation_trajectories_per_building',32)),task=c.get('route_task','image'))
+            manifest,design=select_category_validation(manifest,heldout,int(c.get('validation_trajectories_per_building',32)))
         else:
             selected={}
             for item in sorted(manifest,key=lambda m:hashlib.sha256(m['key'].encode()).hexdigest()):

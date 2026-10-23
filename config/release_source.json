@@ -1,10 +1,10 @@
 {
-  "source_branch": "feat/image-pointcontroller-depth-v3",
-  "source_commit": "3b8ff811574efd4c9565418646c1797b16037b08",
+  "source_branch": "feat/object-pointcontroller-depth-v3",
+  "source_commit": "071d992518e721f13171e3c9dd1de0d66fd3ace1",
   "guidance_variant": "route",
   "training_epochs": 5,
   "training_world_size": 3,
-  "evaluation_episodes": 1470,
+  "evaluation_episodes": 1710,
   "igibson_commit": "7d9598278b95ec1039e1f4366c66b45346521e44",
   "diffusion_policy_commit": "5ba07ac6661db573af695b419a7947ecb704690f"
 }

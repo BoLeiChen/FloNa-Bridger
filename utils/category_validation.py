@@ -6,13 +6,7 @@ from pathlib import Path
 import numpy as np
 
 
-def image_validation_group(root,scene):
-    # Stratification only; ImageGoal requires no object annotations.
-    parts=Path(root).resolve().parts
-    source='without_obj' if any('without_obj' in p for p in parts) else 'with_obj'
-    return source+'::'+scene
-
-def select_category_validation(manifest, heldout, per_building=32, task="object"):
+def select_category_validation(manifest, heldout, per_building=32):
     if per_building<1:raise ValueError('Invalid validation trajectory budget')
     groups=defaultdict(lambda:defaultdict(list))
     for item in manifest:
@@ -22,15 +16,10 @@ def select_category_validation(manifest, heldout, per_building=32, task="object"
         if not any(p=='train' or p.startswith('train_') for p in parts) or any(p=='test' or p.startswith('test_') for p in parts):
             raise ValueError('Validation must come only from navigation training buildings')
         traj=item['key'].split('::')[-1]
-        if task=='image':
-            category=image_validation_group(root,scene)
-            identity=traj
-        elif task=='object':
-            raw=json.loads((Path(root)/scene/traj/'object/object.json').read_text());v=raw[0] if isinstance(raw,list) else raw
-            from datasets.object_category_targets import category_name
-            category=category_name(v['object_category']);identity=str(v['object_id'])
-        else:raise ValueError('Unknown validation task')
-        groups[building][category].append((scene,identity,item))
+        raw=json.loads((Path(root)/scene/traj/'object/object.json').read_text());v=raw[0] if isinstance(raw,list) else raw
+        from datasets.object_category_targets import category_name
+        category=category_name(v['object_category'])
+        groups[building][category].append((scene,str(v['object_id']),item))
     selected=[];audit={}
     for building,categories in sorted(groups.items()):
         queues={}

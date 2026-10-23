@@ -1,5 +1,5 @@
 """Training-only ImageGoal hypotheses: cached image localization, GT labels isolated."""
-import hashlib,random,json
+import hashlib,random
 from pathlib import Path
 from collections import OrderedDict
 import lmdb
@@ -9,7 +9,7 @@ from datasets.lmdb_dataset import decode_record
 from datasets.pointgoal_bridge_dataset import mark_floorplan
 from datasets.multimodal_path_dataset import MultimodalPathLMDB,task_for_window
 from datasets.path_distribution import VisitMemory,training_labels
-from datasets.hypothesis_routes import HypothesisRoutes,hypothesis_labels,refresh_offsets
+from datasets.hypothesis_routes import HypothesisRoutes,hypothesis_labels,refresh_offsets,dynamic_candidate_mask
 from datasets.route_goal_supervision import GoalDistanceCache
 from localization.hypothesis_factory import provider_for,trajectory_hypotheses,object_task
 from datasets.object_category_targets import load_category_targets
@@ -25,9 +25,7 @@ class HypothesisRouteLMDB(MultimodalPathLMDB):
         self.provider=provider_for(config,allow_inference=False)
         self.label_distances=GoalDistanceCache(32)
         self.category_distances=CategoryDistanceCache(16)
-        self.region_labels=config.get('route_supervision') in ('object-category-center-region-v2','image-goal-region-v2')
         self.category_labels=config.get('route_supervision')=='object-category-center-region-v2'
-        if config.get('route_supervision')=='image-goal-region-v2' and object_task(config):raise ValueError('Image region supervision is ImageGoal only')
         if self.category_labels and not object_task(config):raise ValueError('Category supervision is ObjectGoal only')
 
     def __iter__(self):
@@ -54,15 +52,9 @@ class HypothesisRouteLMDB(MultimodalPathLMDB):
                     if not np.array_equal(cached,record['current_indices']) or not np.isin(starts,cached).all() or len(starts)!=item['sample_count']:
                         raise ValueError('LMDB manifest/stride does not match sample geometry')
                     planner=self.maps.planner(root,scene)
-                    label_tree=None if self.region_labels else planner.goal_tree(poses[-1,:2])
+                    label_tree=None if self.category_labels else planner.goal_tree(poses[-1,:2])
                     targets=(load_category_targets(self.config['scene_assets'],scene,Path(root)/scene/record['traj_name'])
                              if self.category_labels else None)
-                    if self.region_labels and not self.category_labels:
-                        targets=dict(world_xy=[poses[-1,:2].tolist()],object_ids=['goal_image'])
-                    label_category=targets['category'] if self.category_labels else None
-                    if self.region_labels and not self.category_labels:
-                        from utils.category_validation import image_validation_group
-                        label_category=image_validation_group(root,scene)
                     goal_path=Path(root)/scene/record['traj_name']/'rgb'/('rgb_%d.png'%(len(poses)-1))
                     hypotheses=trajectory_hypotheses(self.provider,self.config,root,scene,record['traj_name'],len(poses))
                     goal_text=hypotheses.pop('goal_text',None)
@@ -77,20 +69,22 @@ class HypothesisRouteLMDB(MultimodalPathLMDB):
                         for past in range(last+1,start+1):memory.update(poses[past,:2])
                         last=start
                         sample_id='%s::%s::%d'%(scene,record['traj_name'],start)
-                        if self.region_labels and not self.category_labels:sample_id=root+'::'+sample_id
                         task=2 if object_task(self.config) else task_for_window(sample_id,self.epoch,self.config)
                         position=poses[start,:2];yaw=np.arctan2(poses[start,3]-poses[start,1],poses[start,2]-poses[start,0])
                         # Expose the reject head to reservoir replenishment during training too.
                         digest=int.from_bytes(hashlib.sha256((sample_id+':'+str(self.epoch)).encode()).digest()[:4],'big')
                         n=len(hypotheses['poses']);k=int(self.config['goal_top_k'])
                         offset=(k+(digest//100)%max(1,n-k)) if n>k and digest%100<int(100*float(self.config.get('hypothesis_tail_train_fraction',.25))) else 0
-                        if self.region_labels and offset:
+                        if self.category_labels and offset:
                             offsets=refresh_offsets(n,k)
                             offset=offsets[(digest//100)%len(offsets)] if offsets else 0
                         proposer.set_offset(offset)
                         candidates=proposer.propose(planner,position,yaw,memory)
+                        effective_k=int(self.config['goal_top_k']);effective_exploration=int(self.config.get('exploration_candidates',2));dynamic_offset=0
+                        if self.config.get('dynamic_candidate_training') and wanted is None:
+                            effective_k,effective_exploration,dynamic_offset=dynamic_candidate_mask(candidates,self.config,digest)
                         expert=self._future_pose_tensor(poses,start)
-                        if self.region_labels:
+                        if self.category_labels:
                             labels=category_route_labels(candidates,planner,position,targets,self.category_distances,self.config)
                         else:
                             labels=training_labels(candidates,expert.numpy(),planner,poses[-1,:2],label_tree,
@@ -106,9 +100,11 @@ class HypothesisRouteLMDB(MultimodalPathLMDB):
                             floor_key=item['floor_key'],label_goal_world=torch.tensor(poses[-1,:2].copy(),dtype=torch.float32))
                         if goal_text is not None:sample['goal_text']=torch.from_numpy(goal_text.copy())
                         if targets is not None:
-                            sample.update(object_category=label_category,label_version=self.config['route_supervision'],
-                                          label_asset_sha256=targets.get('source_sha256',hashlib.sha256(poses[-1,:2].tobytes()).hexdigest()),building=scene.rsplit('_',1)[0],
-                                          hypothesis_offset=offset)
+                            sample.update(object_category=targets['category'],label_version=self.config['route_supervision'],
+                                          label_asset_sha256=targets['source_sha256'],building=scene.rsplit('_',1)[0],
+                                          hypothesis_offset=offset,dynamic_goal_top_k=effective_k,
+                                          dynamic_exploration_candidates=effective_exploration,
+                                          dynamic_hypothesis_offset=dynamic_offset)
                         sample.update({k:torch.from_numpy(v) for k,v in {**candidates,**labels}.items()})
                         yielded+=1
                         yield sample

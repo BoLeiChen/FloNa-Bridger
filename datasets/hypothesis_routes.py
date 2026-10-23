@@ -9,11 +9,37 @@ from datasets.route_goal_supervision import route_goal_labels
 
 
 def route_signature(config):
-    keys=('goal_top_k','exploration_candidates','hypothesis_max_snap_m','goal_label_radius_m','route_label_temperature','path_route_points','path_proposal_pool','len_traj_pred','astar_step_m','astar_free_threshold','astar_clearance_m','astar_max_snap_m','astar_exclude_exterior','history_length','traj_pace','validation_buildings_file')
-    keys+=('route_supervision','route_policy_version','route_objective','validation_design','data_folder')
+    keys=('goal_top_k','exploration_candidates','dynamic_candidate_training','dynamic_goal_top_k',
+          'dynamic_exploration_candidates','hypothesis_max_snap_m','goal_label_radius_m',
+          'route_label_temperature','path_route_points','path_proposal_pool','len_traj_pred',
+          'astar_step_m','astar_free_threshold','astar_clearance_m','astar_max_snap_m',
+          'astar_exclude_exterior','history_length','traj_pace','validation_buildings_file')
+    keys+=('route_supervision','route_policy_version','route_objective','validation_design')
     split=config.get('validation_buildings_file')
     split_hash=hashlib.sha256(Path(split).read_bytes()).hexdigest() if split and Path(split).is_file() else None
-    return hashlib.sha256(json.dumps(dict(version='hypothesis-routes-v4-source-aware',split_sha256=split_hash,parameters={k:config.get(k) for k in keys}),sort_keys=True).encode()).hexdigest()
+    return hashlib.sha256(json.dumps(dict(version='hypothesis-routes-v3',split_sha256=split_hash,parameters={k:config.get(k) for k in keys}),sort_keys=True).encode()).hexdigest()
+
+def dynamic_candidate_mask(candidates,config,digest):
+    """Mask a max-K/max-E proposal to a deterministic training cardinality."""
+    maximum_k=int(config['goal_top_k']);maximum_e=int(config.get('exploration_candidates',2))
+    goal_choices=tuple(map(int,config.get('dynamic_goal_top_k',[maximum_k])))
+    exploration_choices=tuple(map(int,config.get('dynamic_exploration_candidates',[maximum_e])))
+    if not goal_choices or not exploration_choices:raise ValueError('Dynamic candidate choices cannot be empty')
+    if any(k<1 or k>maximum_k for k in goal_choices):raise ValueError('Dynamic goal K exceeds configured maximum')
+    if any(e<1 or e>maximum_e for e in exploration_choices):raise ValueError('Dynamic exploration count exceeds configured maximum')
+    k=goal_choices[digest%len(goal_choices)]
+    e=exploration_choices[(digest//len(goal_choices))%len(exploration_choices)]
+    allowed=np.zeros(maximum_k+maximum_e,bool)
+    offset=0
+    tail_fraction=float(config.get('hypothesis_tail_train_fraction',.25))
+    tail_token=(digest//max(1,len(goal_choices)*len(exploration_choices)))%10000
+    if maximum_k>k and tail_token<int(round(10000*tail_fraction)):
+        offsets=refresh_offsets(maximum_k,k)
+        if offsets:offset=offsets[(digest//10000)%len(offsets)]
+    selected=(np.arange(k)+offset)%maximum_k
+    allowed[selected]=True;allowed[maximum_k:maximum_k+e]=True
+    candidates['candidate_mask']&=allowed
+    return k,e,offset
 
 def refresh_offsets(size,k):
     """Exactly the noninitial reservoirs reachable by repeated online refresh()."""

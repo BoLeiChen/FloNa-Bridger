@@ -34,21 +34,3 @@ def test_distributed_loss_counts_and_validation_no_collective(monkeypatch):
     torch.testing.assert_close(distributed,local*2/3)
     assert len(calls)==1
     distributed.backward();assert torch.isfinite(logits.grad).all()
-
-
-def test_image_validation_covers_sources_without_object_annotations(tmp_path):
-    import tempfile
-    from pathlib import Path
-    with tempfile.TemporaryDirectory(prefix="image_v2_validation_") as base:
-        tmp_path=Path(base)
-        from utils.category_validation import select_category_validation
-        items=[]
-        for source in ('with_obj','without_obj'):
-            root=tmp_path/'train'/source;root.mkdir(parents=True)
-            items.append(dict(key='traj::%s::building_0::traj_0'%root,
-                              floor_key='floor::%s::building_0'%root,sample_count=5))
-        # Neither trajectory has object.json; both are valid ImageGoal data sources.
-        selected,audit=select_category_validation(items,{'building'},2,task='image')
-        assert len(selected)==2 and len({s['key'] for s in selected})==2
-        assert audit['building']['selected_categories']==2
-        assert selected==select_category_validation(list(reversed(items)),{'building'},2,task='image')[0]

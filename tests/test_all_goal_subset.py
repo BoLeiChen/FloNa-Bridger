@@ -81,7 +81,7 @@ def test_all_shipped_training_configs_use_hm3d_stride8_subset():
             continue
         assert cfg.traj_pace==8, path.name
         assert cfg.train_scene_dataset=='hm3d', path.name
-        assert len(cfg.data_folder) == 2, path.name
+        assert len(cfg.data_folder) == (1 if cfg.get('route_task') == 'object' else 2), path.name
     import gzip
     with gzip.open(ROOT/'config/training_selection.json.gz', 'rt') as stream:
         rows=json.load(stream)['records']

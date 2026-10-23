@@ -1,7 +1,4 @@
-"""Shared success-region labels: ImageGoal singleton or ObjectGoal target set.
-
-Ground-truth targets are supervision only, never policy feature tensors.
-"""
+"""Any-instance ObjectGoal labels; no target enters the policy feature tensors."""
 from collections import OrderedDict
 import hashlib
 import numpy as np

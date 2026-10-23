@@ -31,7 +31,7 @@ class ObjectHypothesisProvider:
             from cf2loc_mm.object_disco import ObjectDisCoLocalizer
             devices=[] if self.device.type=='cpu' else [self.device.index or 0]
             with torch.random.fork_rng(devices=devices):
-                if self.engine is None:self.engine=ObjectDisCoLocalizer(self.config['diffusion_checkpoint'],self.config['disco_checkpoint'],self.device)
+                if self.engine is None:self.engine=ObjectDisCoLocalizer(self.config['diffusion_checkpoint'],self.config['disco_checkpoint'],self.device,backbone_paths={'clip_checkpoint': self.config['clip_checkpoint']})
                 with Image.open(map_path) as im:
                     r=self.engine.predict(im.convert('RGB'),origin_xy=origin_xy,extent_xy=extent_xy,category=category,top_k=64,seed=int(signature[:15],16))
             # Third column is a storage placeholder, never an estimated orientation.

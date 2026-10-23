@@ -1,3 +1,4 @@
+import json
 """Simulator helpers retained from the evaluated PointGoal source."""
 import os
 import re
@@ -88,3 +89,13 @@ def list_scene_ids(scenes_dir, explicit_scene_ids=None, excluded_scene_ids=None)
         if os.path.isdir(os.path.join(scenes_dir, scene_id)) and scene_id not in excluded_scene_ids
         and scene_selected(scene_id, {"train_scene_dataset": "hm3d"})
     )
+
+
+def read_object_goal(scenes_dir, scene_id, traj_id):
+    """Read the object category for one object-goal trajectory."""
+    obj_json_path = os.path.join(scenes_dir, scene_id, traj_id, "object", "object.json")
+    with open(obj_json_path, "r") as f:
+        obj_data = json.load(f)
+    if isinstance(obj_data, list):
+        obj_data = obj_data[0] if obj_data else {}
+    return [obj_data.get("object_category", "null")]

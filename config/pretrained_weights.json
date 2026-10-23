@@ -1,6 +1,7 @@
 {
-  "localizer.ckpt": "159b032fd83d0b41e7dac9fd4bd986d347e8014ba461d52a05d144b0f91c2155",
-  "disco.pt": "9a931d509398f9f22ae768097f45aa1f189264db72b44c9f91b91391dd71090e",
   "controller_training.pth": "151047a8393506f71834385823c349ff3a573f2e7a996ff756584f9712ce3e31",
-  "controller_navigation.pth": "764427dfe3fb163cf42fc2fd7e2e6fec83fd3253b86784a1641158ce9a5caf18"
+  "controller_navigation.pth": "764427dfe3fb163cf42fc2fd7e2e6fec83fd3253b86784a1641158ce9a5caf18",
+  "object_localizer.pt": "3ed32be20dabd9ce5ebe1a677fbe4704a951d023bcabe8f421ff9c22ed93e3cd",
+  "object_disco.pt": "e0f2650f85a051be53e3faed0818fc1aed8955d9f14d7b7751b5f33fe2860bac",
+  "ViT-B-16.pt": "5806e77cd80f8b59890b7e101eabd078d9fb84e6937f9e85e4ecb61988df416f"
 }

@@ -23,54 +23,6 @@ from eval.path_policy_state import PathPolicyState
 from eval.object_category_protocol import (load_category_targets, distance_to_category,
     category_reference_length, score_category_trajectory)
 
-V2_POLICY_OVERRIDE_TYPES = {
-    'goal_reject_enter': float, 'goal_reject_leave': float,
-    'goal_reject_ema_alpha': float, 'goal_reject_confirm_cycles': int,
-    'route_switch_log_ratio': float, 'route_switch_confirm_cycles': int,
-    'route_min_hold_cycles': int, 'route_progress_window': int,
-    'route_cooldown_cycles': int, 'route_cooldown_penalty': float,
-    'hypothesis_refresh_cycles': int, 'route_arrival_m': float,
-}
-
-
-def apply_v2_policy_overrides(config, values):
-    """Apply an explicit inference-only allowlist and validate it as one policy."""
-    if values and config.get('route_policy_version') != 'category-v2':
-        raise ValueError('V2 policy overrides require a category-v2 checkpoint')
-    applied = {}
-    for item in values:
-        if '=' not in item:
-            raise ValueError('Expected --v2-policy-override NAME=VALUE')
-        name, raw = item.split('=', 1)
-        if name not in V2_POLICY_OVERRIDE_TYPES:
-            raise ValueError('Unsupported V2 policy override: ' + name)
-        if name in applied:
-            raise ValueError('Duplicate V2 policy override: ' + name)
-        cast = V2_POLICY_OVERRIDE_TYPES[name]
-        try:
-            value = cast(raw)
-        except ValueError as error:
-            raise ValueError(f'Invalid value for {name}: {raw}') from error
-        applied[name] = value
-        config[name] = value
-    if values:
-        leave=float(config.get('goal_reject_leave',.35))
-        enter=float(config.get('goal_reject_enter',.65))
-        alpha=float(config.get('goal_reject_ema_alpha',.5))
-        if not 0 <= leave < enter <= 1 or not 0 < alpha <= 1:
-            raise ValueError('Require 0 <= reject_leave < reject_enter <= 1 and EMA alpha in (0,1]')
-        for name in ('goal_reject_confirm_cycles','route_switch_confirm_cycles',
-                     'route_min_hold_cycles','route_progress_window',
-                     'route_cooldown_cycles','hypothesis_refresh_cycles'):
-            if int(config.get(name, 1)) < 1:
-                raise ValueError(name + ' must be at least one')
-        for name in ('route_switch_log_ratio','route_cooldown_penalty'):
-            if float(config.get(name, 0)) < 0:
-                raise ValueError(name + ' must be nonnegative')
-        if float(config.get('route_arrival_m',.5)) <= 0:
-            raise ValueError('route_arrival_m must be positive')
-    return applied
-
 
 def capture(env, device):
     rgb, = env.simulator.renderer.render_robot_cameras(modes=('rgb',), cache=False)
@@ -92,11 +44,11 @@ def load_models(checkpoint, device, paths_config=None):
         raise ValueError('Expected a supported path-distribution checkpoint')
     config = dict(saved['config'])
     if paths_config is not None:
-        for key in ('scene_assets','map_cache','prior_cache','goal_hypothesis_cache'):
+        for key in ('scene_assets','map_cache','prior_cache','object_hypothesis_cache'):
             config[key] = paths_config[key]
-        config['goal_localization'] = dict(config['goal_localization'])
-        for key in ('diffusion_checkpoint','cf2loc_disco_checkpoint','gibson_dataset_root','dinov2_checkpoint'):
-            config['goal_localization'][key] = paths_config['goal_localization'][key]
+        config['object_localization'] = dict(config['object_localization'])
+        for key in ('code_root','diffusion_checkpoint','disco_checkpoint','clip_checkpoint'):
+            config['object_localization'][key] = paths_config['object_localization'][key]
     model_class=ObjectTopKRouteBridge if saved['format']==OBJECT_FORMAT else TopKRouteBridge if saved['format']==TOPK_FORMAT else PathDistributionV2 if saved['format']==V2_FORMAT else PointBridgePlanner
     planner = model_class(config, load_pretrained=False).to(device).eval()
     planner.load_state_dict(saved['planner'], strict=True)
@@ -115,9 +67,6 @@ def rollout(env, trajectory, floor, map_planner, planner, config, args, director
     category_length = None
     if task == 2 and getattr(args, 'object_success_mode', 'category') == 'category':
         category_targets = load_category_targets(config['scene_assets'], trajectory.parents[1].name, trajectory.parent)
-    region_image = task==1 and config.get('route_supervision')=='image-goal-region-v2'
-    if region_image:
-        category_targets=dict(world_xy=[gt_goal.tolist()],object_ids=['goal_image'])
     def success_distance(position):
         return (distance_to_category(position, category_targets) if category_targets is not None
                 else float(np.linalg.norm(position-gt_goal)))
@@ -284,9 +233,6 @@ def rollout(env, trajectory, floor, map_planner, planner, config, args, director
     scored = (score_category_trajectory(array, category_start, category_targets, category_length,
                                       args.collision_limit, args.success_distance)
               if category_targets is not None else score_trajectory(array, poses, args.collision_limit, args.success_distance))
-    if region_image:
-        from eval.image_region_protocol import image_region_result
-        scored=image_region_result(scored)
     result = dict(scored, moves=moves, replans=replans, failed_astar=failed_priors,
                   runtime_collisions=collisions, fallback_failures=fallback_failures,
                   terminal_distance=success_distance(position),
@@ -302,14 +248,10 @@ def rollout(env, trajectory, floor, map_planner, planner, config, args, director
                   diagnostic_route_mode=getattr(args,'diagnostic_route_mode','learned'),
                   diagnostic_goal_mode=getattr(args,'diagnostic_goal_mode','correct'),
                   controller_checkpoint=getattr(args,'controller_checkpoint',None))
-    if config.get('route_policy_version')=='category-v2':
-        result.update(route_policy='shared_topk_v2_persistent_exploration_hysteresis',
-                      route_supervision=config.get('route_supervision'),route_objective=config.get('route_objective'))
-    if region_image:result['evaluation_start_xy']=category_start.tolist()
     if task==2:
         result.update(object_category=category,object_success_protocol=scored.get('object_success_protocol','original_reference_trajectory_endpoint'),route_policy='same_learned_topk_route_and_rejection_as_imagegoal')
         if config.get('route_policy_version')=='category-v2':
-            result.update(route_policy='shared_topk_v2_persistent_exploration_hysteresis',
+            result.update(route_policy='object_category_v2_persistent_exploration_hysteresis',
                           route_supervision=config.get('route_supervision'),route_objective=config.get('route_objective'))
         if category_targets is not None:
             result.update(category_target_provenance=category_targets,
@@ -332,8 +274,10 @@ def main():
     from eval.common import build_env, set_seed, stable_string_seed, list_traj_ids, list_scene_ids
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint', required=True)
-    parser.add_argument('--paths-config', default='config/imagegoal_v3.yaml')
+    parser.add_argument('--paths-config', default='config/objectgoal_v3.yaml')
     parser.add_argument('--goal-top-k',type=int,help='Inference K ablation for TopK models; record distribution change')
+    parser.add_argument('--exploration-candidates',type=int,
+                        help='Inference-only override for the number of exploration routes')
     parser.add_argument('--device', choices=['auto','cpu','cuda'], default='auto')
     parser.add_argument('--scenes-dir')
     parser.add_argument('--goal-type', choices=['point','image','object'], default='image')
@@ -354,8 +298,6 @@ def main():
     parser.add_argument('--controller-checkpoint')
     parser.add_argument('--navigation-controller-checkpoint')
     parser.add_argument('--guidance-config')
-    parser.add_argument('--v2-policy-override',action='append',default=[],metavar='NAME=VALUE',
-                        help='Inference-only category-v2 override from a strict allowlist')
     parser.add_argument('--diagnostic-seed-per-episode',action='store_true')
     args = parser.parse_args()
     if args.guidance_config and not args.navigation_controller_checkpoint:
@@ -367,13 +309,21 @@ def main():
     device = torch.device(('cuda:0' if torch.cuda.is_available() else 'cpu') if args.device=='auto' else args.device)
     paths_config = OmegaConf.to_container(OmegaConf.load(args.paths_config), resolve=True)
     config, planner = load_models(args.checkpoint, device, paths_config)
-    args.effective_v2_policy_overrides=apply_v2_policy_overrides(config,args.v2_policy_override)
     trained_k=config.get('goal_top_k')
     if args.goal_top_k is not None:
         if trained_k is None or not 1<=args.goal_top_k<=64:raise ValueError('Top-K override requires TopK checkpoint and K in [1,64]')
         config['goal_top_k']=args.goal_top_k
     args.trained_goal_top_k=trained_k
     args.evaluation_goal_top_k=config.get('goal_top_k')
+    trained_exploration_candidates=config.get('exploration_candidates')
+    if args.exploration_candidates is not None:
+        if trained_exploration_candidates is None:
+            raise ValueError('Exploration override requires a TopK route checkpoint')
+        if not 1 <= args.exploration_candidates <= config['goal_top_k']:
+            raise ValueError('exploration-candidates must be in [1, evaluation goal_top_k]')
+        config['exploration_candidates']=args.exploration_candidates
+    args.trained_exploration_candidates=trained_exploration_candidates
+    args.evaluation_exploration_candidates=config.get('exploration_candidates')
     if args.diagnostic_route_mode=='oracle' or args.controller_checkpoint:
         from eval.path_diagnostics import DiagnosticPolicy
         controller=None
