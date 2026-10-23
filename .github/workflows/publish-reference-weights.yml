@@ -1,0 +1,65 @@
+name: Publish complete HM3D reference weights
+on:
+  push:
+    branches: [imagegoal-hm3d-v3]
+    paths: [.github/workflows/publish-reference-weights.yml]
+permissions:
+  contents: write
+concurrency:
+  group: publish-hm3d-reference-weights-v1
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 217c95e139a7e097a2b91acc17f66bf2fe3c4249
+          path: image
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          ref: cddbd4275241376ff62327fafd851466403c3e6b
+          path: object
+          persist-credentials: false
+      - name: Restore and verify original checkpoint files
+        run: |
+          python image/scripts/prepare_weights.py --output staging/image
+          python object/scripts/prepare_weights.py --output staging/object
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, shutil
+          output=Path('weights');output.mkdir()
+          sources={}
+          for task in ('image','object'):
+              for source in sorted((Path('staging')/task).iterdir()):
+                  name=task+'goal_selector.pth' if source.name=='selector.pth' else source.name
+                  digest=hashlib.sha256(source.read_bytes()).hexdigest()
+                  if name in sources:
+                      assert sources[name]['sha256']==digest
+                      continue
+                  shutil.copyfile(source,output/name)
+                  sources[name]={'bytes':source.stat().st_size,'sha256':digest}
+          (output/'manifest.json').write_text(json.dumps(sources,indent=2)+'\n')
+          (output/'SHA256SUMS').write_text(''.join(v['sha256']+'  '+k+'\n' for k,v in sorted(sources.items())))
+          PY
+      - name: Publish complete files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cat > notes.md <<'EOF'
+          Original HM3D reference checkpoints for the ImageGoal and ObjectGoal branches. Each asset is a complete checkpoint; no part assembly is needed. SHA256SUMS and manifest.json record the original checksums and sizes.
+
+          Shared: controller_training.pth and controller_navigation.pth.
+          ImageGoal: localizer.ckpt, disco.pt, imagegoal_selector.pth. refiner_init.ckpt is optional and only initializes image-ranker training; navigation does not use it.
+          ObjectGoal: object_localizer.pt, object_disco.pt, objectgoal_selector.pth.
+
+          See each branch README for environment, data and evaluation commands. These are the audited reference checkpoint files; publishing them does not constitute a rerun of full training or corrected navigation evaluation.
+          EOF
+          if ! gh release view hm3d-reference-weights-v1 >/dev/null 2>&1; then
+            gh release create hm3d-reference-weights-v1 --target 217c95e139a7e097a2b91acc17f66bf2fe3c4249 --title 'HM3D reference weights (complete files)' --notes-file notes.md --draft
+          fi
+          gh release upload hm3d-reference-weights-v1 weights/* --clobber
+          gh release edit hm3d-reference-weights-v1 --draft=false --latest=false
