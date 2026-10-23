@@ -1,0 +1,24 @@
+{
+  "object_localizer.pt": {
+    "bytes": 27709775,
+    "sha256": "3ed32be20dabd9ce5ebe1a677fbe4704a951d023bcabe8f421ff9c22ed93e3cd",
+    "parts": [
+      {
+        "path": "object_localizer.pt.part-00",
+        "bytes": 27709775,
+        "sha256": "3ed32be20dabd9ce5ebe1a677fbe4704a951d023bcabe8f421ff9c22ed93e3cd"
+      }
+    ]
+  },
+  "object_disco.pt": {
+    "bytes": 3243419,
+    "sha256": "e0f2650f85a051be53e3faed0818fc1aed8955d9f14d7b7751b5f33fe2860bac",
+    "parts": [
+      {
+        "path": "object_disco.pt.part-00",
+        "bytes": 3243419,
+        "sha256": "e0f2650f85a051be53e3faed0818fc1aed8955d9f14d7b7751b5f33fe2860bac"
+      }
+    ]
+  }
+}
