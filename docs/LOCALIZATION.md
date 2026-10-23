@@ -46,6 +46,16 @@ python scripts/localization/configure_localization.py --task image --diffusion c
 
 Ranker preparation selects 120,000 training and 6,000 validation frames, samples 64 diffusion particles with 10 denoising steps and retains five spatial/angular modes. Training candidates include supervised positive/heading alternatives; validation candidates do not. Ranker training uses batch size 16 per GPU, AdamW (`lr=1e-4`, weight decay `1e-4`), cosine decay to `1e-5`, at most 12 epochs and patience 4. Validation selects the checkpoint and fusion weight; the YAML preserves all mining and fusion settings.
 
+## Test localization separately
+
+After checkpoint selection, evaluate the fixed pair on the localization test split:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/localization/evaluate_image_localization.py --config config/localization/image_disco.yaml --ranker runs/localization/image_disco/best.pt --split test --output results/localization/image_test
+```
+
+`metrics.json` reports diffusion and reranked localization recall, position/yaw error and split coverage. The ranker's fusion weight and retained-mode count come from its checkpoint; the test set does not select them. This uses the localization ranking protocol (five retained modes in the supplied config), while navigation uses its separate Top-K path-hypothesis protocol. Omit `--ranker` for diffusion-only evaluation. `--limit` is for smoke checks and does not constitute a full test. The complete test command requires the test LMDB constructed above.
+
 The downloadable `disco.pt` remains the historical reference checkpoint, whose map encoder was initialized from a refiner. It already contains all inference weights and does not need that refiner at runtime. The new from-scratch ranker workflow changes this initialization and learns batch-normalization statistics; its final navigation performance has not been measured and must not be equated with the historical reference results. If retraining the diffusion parent, train a new ranker, run `configure_localization.py` to bind both weights, and rebuild navigation hypotheses and validation caches before following the main README.
 
 From-scratch training here refers to the task-specific localization and ranking modules. The original frozen public visual backbone is retained; download it as described in the main README. Full retraining and corrected full navigation evaluation have not been repeated for this release.

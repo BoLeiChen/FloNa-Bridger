@@ -21,6 +21,8 @@ python -m igibson.utils.assets_utils --download_assets
 
 Install iGibson's [native dependencies](https://github.com/StanfordVL/iGibson) and ensure NVIDIA OpenGL/EGL works. Extract `floverse_scene_dataset.tar` from [FloVerse-1.6k](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k) into `iGibson/igibson/data/`, producing `g_dataset/`.
 
+Choose **reference evaluation**, **selector-only training**, or **full staged training** using the [pipeline guide](docs/PIPELINE.md). It lists the data, parent weights and output consumed at every stage.
+
 ## Data and pretrained models
 
 Our dataset is a fixed HM3D subset reorganized from [FloVerse-1.6k (original data download)](https://modelscope.cn/datasets/weiqihuang/floverse-1.6k). Download `train_without_obj/HM3D` and `train_with_obj`, plus `eval_with_obj`. Extract the per-scene archives, preserve scene/trajectory names and all frames, and place or symlink the extracted scene folders under the following paths.
@@ -61,7 +63,7 @@ python scripts/download_weights.py
 `config/pretrained_weights.json` records the reference SHA-256 hashes. `config/weights.json` lists complete-file URLs, sizes and hashes. The downloader refuses to overwrite different existing weights. The task-specific selector asset is saved as `checkpoints/selector.pth`. For evaluation with the supplied selector, complete setup, download the visual backbone(s), download weights and prepare only `data/eval_with_obj` plus the scene assets; then go directly to **Evaluation**. Training caches are unnecessary for this path. To train localization/ranking models, follow [Localization training](docs/LOCALIZATION.md). The ImageGoal ranker starts from random initialization with no refiner stage or checkpoint; the original public visual backbone remains frozen.
 
 
-Build the training cache, maps, goal hypotheses and held-out validation samples:
+For selector-only training with the reference localization pair, build the training cache, maps, hypotheses and held-out validation samples:
 
 ```bash
 python scripts/prepare_data.py --config config/imagegoal_v3.yaml
@@ -72,9 +74,13 @@ CUDA_VISIBLE_DEVICES=0 python utils/prepare_topk_routes.py --config config/image
 
 `config/training_selection.json.gz` selects 118,143 `without_obj` and 57,750 `with_obj` trajectories for the shared controller cache. `prepare_data.py` checks their lengths and builds a stride-4 LMDB cache; training uses stride-8 windows with 16 waypoints, so keep all raw frames. For ImageGoal selector training, `config/image_validation_buildings.json` holds out 92 training buildings, leaving 147,843 trajectories; validation samples are built by `--build-validation`. This holdout applies to the selector, not the PointGoal controllers. Evaluation uses only the 1,470 upstream evaluation trajectories in `config/imagegoal_eval_1470.json`; the final RGB frame provides the image goal.
 
+Evaluation trajectories are not required to construct the training cache; `prepare_data.py --check-evaluation` optionally checks them.
+
 Use fresh LMDB and validation-cache paths. Regenerate caches after changing data/model paths. The PointGoal branch's LMDB can be reused with the same training roots.
 
 ## Training
+
+The commands below train the path selector with prepared parent models. For full retraining, train both controllers and the localization/ranking pair first, following [the stage order](docs/PIPELINE.md#c-train-all-task-specific-stages).
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1,2 OMP_NUM_THREADS=2 torchrun --standalone --nproc_per_node=3 \

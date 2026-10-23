@@ -19,7 +19,7 @@ def frame_bytes(directory):
     return {int(p.stem.rsplit('_', 1)[-1]): p.read_bytes() for p in directory.glob('*.png')}
 
 
-def prepare(config, selection, max_trajectories=None, map_size_gb=600):
+def prepare(config, selection, max_trajectories=None, map_size_gb=600, check_evaluation=False):
     roots = [Path(p).resolve() for p in config['data_folder']]
     rows = selection['records'][:max_trajectories]
     output = Path(config['lmdb_path'])
@@ -31,10 +31,11 @@ def prepare(config, selection, max_trajectories=None, map_size_gb=600):
         if not (folder / (trajectory + '.txt')).is_file():
             raise FileNotFoundError(folder / (trajectory + '.txt'))
     episodes = json.loads(Path(config.get('eval_episodes_file', 'config/evaluation_episodes.json')).read_text())
-    for scene, trajectory in episodes:
-        path = Path(config.get('eval_data_folder', 'data/eval_without_obj/HM3D')) / scene / trajectory / (trajectory + '.txt')
-        if not path.is_file():
-            raise FileNotFoundError(path)
+    if check_evaluation:
+        for scene, trajectory in episodes:
+            path = Path(config.get('eval_data_folder', 'data/eval_without_obj/HM3D')) / scene / trajectory / (trajectory + '.txt')
+            if not path.is_file():
+                raise FileNotFoundError(path)
     output.mkdir(parents=True)
     env = lmdb.open(str(output), map_size=int(map_size_gb * 1024**3))
     resize = transforms.Resize((96, 96))
@@ -77,8 +78,9 @@ if __name__ == '__main__':
     parser.add_argument('--selection', default='config/training_selection.json.gz')
     parser.add_argument('--max-trajectories', type=int, help='Smoke preparation only; use a separate cache path')
     parser.add_argument('--map-size-gb', type=float, default=600)
+    parser.add_argument('--check-evaluation', action='store_true', help='Also check evaluation pose files; not needed for training-cache construction')
     args = parser.parse_args()
     config = OmegaConf.to_container(OmegaConf.load(args.config), resolve=True)
     with gzip.open(args.selection, 'rt') as stream:
         selection = json.load(stream)
-    prepare(config, selection, args.max_trajectories, args.map_size_gb)
+    prepare(config, selection, args.max_trajectories, args.map_size_gb, args.check_evaluation)
